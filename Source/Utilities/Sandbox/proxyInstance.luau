@@ -30,7 +30,7 @@ return function(luaState: VMBindings.LuaState, instance: Instance, deallocator: 
 			deallocator()
 		end
 
-		cFunctions.free(userdataPointer)
+		-- cFunctions.free(userdataPointer)
 	end))
 
 	VMMacros.lua_newtable(luaState)
@@ -63,19 +63,19 @@ return function(luaState: VMBindings.LuaState, instance: Instance, deallocator: 
 	end)
 
 	writeMetaMethod(luaState, "__call", function()
-		cFunctions.luaL_typeerrorL(luaState, VMBindings:LoadCString(`call`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to call a Instance value`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__iter", function()
-		cFunctions.luaL_typeerrorL(luaState, VMBindings:LoadCString(`iterate over`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to iterate over a Instance value`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__len", function()
-		cFunctions.luaL_typeerrorL(luaState, VMBindings:LoadCString(`get length`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to get length a Instance value`))
 
 		return 0
 	end)
@@ -90,97 +90,94 @@ return function(luaState: VMBindings.LuaState, instance: Instance, deallocator: 
 		local stringPointer = cFunctions.lua_typename(luaState, 3, 0)
 		local typeName = VMBindings:ReadCString(stringPointer)
 
-		cFunctions.lua_error(VMBindings:LoadCString(`attempt to perform arithmetic (add) on Instance and {typeName}`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (add) on Instance and {typeName}`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__sub", function()
-		local stringPointer = cFunctions.lua_typename(luaState, 1, 0)
+		local stringPointer = cFunctions.lua_typename(luaState, 3, 0)
 		local typeName = VMBindings:ReadCString(stringPointer)
 
-		cFunctions.lua_error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (sub) on Instance and {typeName}`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (sub) on Instance and {typeName}`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__mul", function()
-		local stringPointer = cFunctions.lua_typename(luaState, 1, 0)
+		local stringPointer = cFunctions.lua_typename(luaState, 3, 0)
 		local typeName = VMBindings:ReadCString(stringPointer)
 
-		cFunctions.lua_error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (mul) on Instance and {typeName}`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (mul) on Instance and {typeName}`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__div", function()
-		local stringPointer = cFunctions.lua_typename(luaState, 1, 0)
+		local stringPointer = cFunctions.lua_typename(luaState, 3, 0)
 		local typeName = VMBindings:ReadCString(stringPointer)
 
-		cFunctions.lua_error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (div) on Instance and {typeName}`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (div) on Instance and {typeName}`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__idiv", function()
-		local stringPointer = cFunctions.lua_typename(luaState, 1, 0)
+		local stringPointer = cFunctions.lua_typename(luaState, 3, 0)
 		local typeName = VMBindings:ReadCString(stringPointer)
 
-		cFunctions.lua_error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (idiv) on Instance and {typeName}`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (idiv) on Instance and {typeName}`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__mod", function()
-		local stringPointer = cFunctions.lua_typename(luaState, 1, 0)
+		local stringPointer = cFunctions.lua_typename(luaState, 3, 0)
 		local typeName = VMBindings:ReadCString(stringPointer)
 
-		cFunctions.lua_error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (mod) on Instance and {typeName}`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (mod) on Instance and {typeName}`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__pow", function()
-		local stringPointer = cFunctions.lua_typename(luaState, 1, 0)
+		local stringPointer = cFunctions.lua_typename(luaState, 3, 0)
 		local typeName = VMBindings:ReadCString(stringPointer)
 
-		cFunctions.lua_error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (pow) on Instance and {typeName}`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (pow) on Instance and {typeName}`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__unm", function()
-		cFunctions.lua_error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (unm) on Instance`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to perform arithmetic (unm) on Instance`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__le", function()
-		local stringPointer = cFunctions.lua_typename(luaState, 1, 0)
+		local stringPointer = cFunctions.lua_typename(luaState, 3, 0)
 		local typeName = VMBindings:ReadCString(stringPointer)
 
-		cFunctions.lua_error(luaState, VMBindings:LoadCString(`attempt to compare Instance < {typeName}`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to compare Instance < {typeName}`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__gt", function()
-		local stringPointer = cFunctions.lua_typename(luaState, 1, 0)
+		local stringPointer = cFunctions.lua_typename(luaState, 3, 0)
 		local typeName = VMBindings:ReadCString(stringPointer)
 
-		cFunctions.lua_error(luaState, VMBindings:LoadCString(`attempt to compare Instance < {typeName}`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to compare Instance < {typeName}`))
 
 		return 0
 	end)
 
 	writeMetaMethod(luaState, "__concat", function()
-		cFunctions.luaL_typeerrorL(luaState, VMBindings:LoadCString(`concatenate`))
+		local stringPointer = cFunctions.lua_typename(luaState, 3, 0)
+		local typeName = VMBindings:ReadCString(stringPointer)
 
-		return 0
-	end)
-
-	writeMetaMethod(luaState, "__concat", function()
-		cFunctions.luaL_typeerrorL(luaState, VMBindings:LoadCString(`concatenate`))
+		VMBindings:Error(luaState, VMBindings:LoadCString(`attempt to concatenate Instance with {typeName}`))
 
 		return 0
 	end)

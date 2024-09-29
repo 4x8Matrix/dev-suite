@@ -45,11 +45,7 @@ function VMBindings.LoadCFunction(_: VMBindings, luaState: LuaState, source: (st
 	local pointer = #LuauCeption.wasm.indirect_function_table.data + 1
 
 	LuauCeption.wasm.indirect_function_table.data[pointer] = function(currentIndex: number)
-		local status, result = pcall(source, luaState, currentIndex)
-
-		if not status then
-			cFunctions.lua_error(luaState, VMBindings:LoadCString(`C Function error: '{result}'`))
-		end
+		local result = source(luaState, currentIndex)
 
 		return result
 	end
@@ -78,6 +74,14 @@ function VMBindings.LoadLuaState(self: VMBindings, bytecode: string): LuaState
 
 		error(`Failed to load Luau bytecode`)
 	end
+end
+
+--[[
+	Errors the Luau VM
+]]
+function VMBindings.Error(_: VMBindings, luaState: LuaState, errorPointer: Pointer)
+	cFunctions.lua_pushstring(luaState, errorPointer)
+	cFunctions.lua_error(luaState)
 end
 
 export type LuaState = number
