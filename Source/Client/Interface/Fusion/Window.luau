@@ -1,0 +1,136 @@
+local Package = script.Parent.Parent.Parent.Parent
+
+local FusionTypes = require(Package.Types.Fusion)
+local PageTypes = require(Package.Types.Page)
+local SignalTypes = require(Package.Types.Signal)
+
+local UICorner = require(Package.Client.Interface.Components.UICorner)
+local UIStroke = require(Package.Client.Interface.Components.UIStroke)
+local UIDrag = require(Package.Client.Interface.Components.UIDrag)
+local UIPadding = require(Package.Client.Interface.Components.UIPadding)
+
+local SidebarPanel = require(Package.Client.Interface.Fusion.SidebarPanel)
+local ContentPanel = require(Package.Client.Interface.Fusion.ContentPanel)
+
+local Theme = require(Package.Client.Interface.Theme)
+
+local Fusion = require(Package.Parent.Fusion)
+
+return function(scope: FusionTypes.Scope, props: {
+	screenGui: FusionTypes.Value<ScreenGui>,
+	selectedPage: FusionTypes.Value<FusionTypes.Value<PageTypes.PageElement<FusionTypes.Scope, any>>>,
+	
+	callbacks: {
+		showWindow: FusionTypes.Value<() -> ()>,
+		hideWindow: FusionTypes.Value<() -> ()>,
+	},
+
+	signals: {
+		sandbox: {
+			evalServerCode: SignalTypes.Signal<string>,
+			evalClientCode: SignalTypes.Signal<string>,
+		},
+	
+		minimiseWindow: SignalTypes.Signal<()>,
+	}
+}): ScreenGui
+	local goalPosition: FusionTypes.Value<number> = scope:Value(0)
+	local tween: FusionTypes.Tween<number> = scope:Tween(goalPosition, TweenInfo.new(0.15, Enum.EasingStyle.Quad))
+
+	props.callbacks.hideWindow:set(function()
+		goalPosition:set(0)
+	end)
+
+	props.callbacks.showWindow:set(function()
+		goalPosition:set(1)
+	end)
+
+	return scope:New("ScreenGui")({
+		IgnoreGuiInset = true,
+		ClipToDeviceSafeArea = false,
+		SafeAreaCompatibility = Enum.SafeAreaCompatibility.None,
+		ScreenInsets = Enum.ScreenInsets.None,
+
+		DisplayOrder = math.huge,
+		ResetOnSpawn = false,
+		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+
+		[Fusion.Children] = {
+			ContentFrame = scope:New("CanvasGroup")({
+				AnchorPoint = Vector2.new(0.5, 0.5),
+
+				Size = scope:Computed(function(use)
+					local value = use(tween)
+
+					return UDim2.fromOffset(484, 212):Lerp(UDim2.fromOffset(584, 312), value)
+				end),
+
+				Position = UDim2.fromScale(0.5, 0.5),
+
+				BackgroundColor3 = Theme.BaseBackgroundColor3,
+
+				[Fusion.Children] = {
+					UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({
+						AspectRatio = 1.872
+					}),
+
+					UIGradient = scope:New("UIGradient")({
+						Transparency = scope:Computed(function(use)
+							local value = use(tween)
+
+							return NumberSequence.new({
+								NumberSequenceKeypoint.new(0, 1 - value),
+								NumberSequenceKeypoint.new(1, 1 - value)
+							})
+						end),
+					}),
+
+					UICorner = UICorner(scope, {}),
+
+					UIStroke = UIStroke(scope, {
+						transparency = scope:Computed(function(use)
+							local value = use(tween)
+
+							return 1 - value
+						end)
+					}),
+
+					UIDrag = UIDrag(scope, {
+						bounds = props.screenGui,
+					}),
+
+					UIPadding = UIPadding(scope, {
+						paddingWidth = UDim.new(0.025, 0),
+						paddingHeight = UDim.new(0.05, 0)
+					}),
+
+					Content = scope:New("CanvasGroup")({
+						Size = UDim2.fromScale(1, 1),
+
+						BackgroundTransparency = 1,
+
+						[Fusion.Children] = {
+							SidebarPanel = SidebarPanel(scope, {
+								selectedPage = props.selectedPage,
+							}),
+							ContentPanel = ContentPanel(scope, {
+								selectedPage = props.selectedPage,
+								signals = props.signals,
+
+								minimiseWindowRequested = function()
+									goalPosition:set(0)
+
+									task.wait(0.2)
+
+									props.signals.minimiseWindow:Fire()
+								end
+							}),
+
+							UICorner = UICorner(scope, {}),
+						}
+					})
+				}
+			})
+		}
+	})
+end
