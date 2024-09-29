@@ -18,6 +18,14 @@ local VMBindings = require(Package.Client.Singletons.VMBindings)
 local VMMacros = require(Package.Client.Singletons.VMMacros)
 
 local warnGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.warn)
+local elapsedTimeGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.elapsedTime)
+local pluginManagerGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.pluginManager)
+local settingsGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.settings)
+local sharedGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.shared)
+local tickGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.tick)
+local timeGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.time)
+local userSettingsGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.userSettings)
+local versionGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.version)
 
 local proxyInstance = require(Package.Utilities.Sandbox.proxyInstance)
 
@@ -26,13 +34,21 @@ local cFunctions = LuauCeption.wasm.cfns
 local VMEnvironment = {}
 
 function VMEnvironment.WriteGlobalInstance(_: VMEnvironment, luaState: VMBindings.LuaState, name: string, instance: Instance)
-	local userdataPointer = proxyInstance(luaState, instance)
+	local _userdataPointer = proxyInstance(luaState, instance)
 
     VMMacros.lua_setglobal(luaState, VMBindings:LoadCString(name))
 end
 
 function VMEnvironment.WriteRobloxEnvironment(self: VMEnvironment, luaState: VMBindings.LuaState)
 	warnGlobal(luaState)
+	elapsedTimeGlobal(luaState)
+	pluginManagerGlobal(luaState)
+	settingsGlobal(luaState)
+	sharedGlobal(luaState)
+	tickGlobal(luaState)
+	timeGlobal(luaState)
+	userSettingsGlobal(luaState)
+	versionGlobal(luaState)
 	
 	self:WriteGlobalInstance(luaState, "game", game)
 	self:WriteGlobalInstance(luaState, "workspace", workspace)

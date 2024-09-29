@@ -23,9 +23,9 @@ end
 
 return function(luaState: VMBindings.LuaState, instance: Instance, deallocator: () -> ()?)
 	local userdataName = VMBindings:LoadCString(tostring(instance))
-	local userdataPointer
+	local _userdataPointer
 	
-	userdataPointer = cFunctions.lua_newuserdatadtor(luaState, 16, VMBindings:LoadCFunction(luaState, function()
+	_userdataPointer = cFunctions.lua_newuserdatadtor(luaState, 16, VMBindings:LoadCFunction(luaState, function()
 		if deallocator then
 			deallocator()
 		end
