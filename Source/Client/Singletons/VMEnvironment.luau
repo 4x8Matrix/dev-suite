@@ -27,19 +27,19 @@ local timeGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.time)
 local userSettingsGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.userSettings)
 local versionGlobal = require(Package.Utilities.Sandbox.Globals.Roblox.version)
 
-local clonefunctionGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.clonefunction)
-local getcallbackvalueGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.getcallbackvalue)
-local getgcGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.getgc)
-local getgenvGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.getgenv)
-local getrenvGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.getrenv)
-local gettenvGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.gettenv)
-local hookfunctionGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.hookfunction)
-local hookmetamethodGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.hookmetamethod)
-local isfunctionhookedGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.isfunctionhooked)
-local isrbxactiveGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.isrbxactive)
-local loadstringGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.loadstring)
-local newcclosureGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.newcclosure)
-local restorefunctionGlobal = require(Package.Utilities.Sandbox.Globals.Exploit.restorefunction)
+local clonefunctionGlobal = require(Package.Utilities.Sandbox.Globals.Swift.clonefunction)
+local getcallbackvalueGlobal = require(Package.Utilities.Sandbox.Globals.Swift.getcallbackvalue)
+local getgcGlobal = require(Package.Utilities.Sandbox.Globals.Swift.getgc)
+local getgenvGlobal = require(Package.Utilities.Sandbox.Globals.Swift.getgenv)
+local getrenvGlobal = require(Package.Utilities.Sandbox.Globals.Swift.getrenv)
+local gettenvGlobal = require(Package.Utilities.Sandbox.Globals.Swift.gettenv)
+local hookfunctionGlobal = require(Package.Utilities.Sandbox.Globals.Swift.hookfunction)
+local hookmetamethodGlobal = require(Package.Utilities.Sandbox.Globals.Swift.hookmetamethod)
+local isfunctionhookedGlobal = require(Package.Utilities.Sandbox.Globals.Swift.isfunctionhooked)
+local isrbxactiveGlobal = require(Package.Utilities.Sandbox.Globals.Swift.isrbxactive)
+local loadstringGlobal = require(Package.Utilities.Sandbox.Globals.Swift.loadstring)
+local newcclosureGlobal = require(Package.Utilities.Sandbox.Globals.Swift.newcclosure)
+local restorefunctionGlobal = require(Package.Utilities.Sandbox.Globals.Swift.restorefunction)
 
 local proxyInstance = require(Package.Utilities.Sandbox.proxyInstance)
 
@@ -88,12 +88,23 @@ end
 --[[
 	Writes sandbox globals so that you can detect if you're in the sandbox or not.
 ]]
-function VMEnvironment.WriteSandboxGlobs(_: VMEnvironment, luaState: VMBindings.LuaState)
+function VMEnvironment.WriteSandboxGlobs(self: VMEnvironment, luaState: VMBindings.LuaState, runtime: string)
 	cFunctions.lua_pushstring(luaState, VMBindings:LoadCString(`{_VERSION}-SANDBOXED`))
 	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("_VERSION"))
 
 	cFunctions.lua_pushboolean(luaState, true)
 	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("_SANDBOXED"))
+
+	if runtime == "Roblox" then
+		self:WriteRobloxEnvironment(luaState)
+	elseif runtime == "Swift" then
+		self:WriteRobloxEnvironment(luaState)
+		self:WriteExploitEnvironment(luaState)
+	elseif runtime == "Luau" then
+		return
+	else
+		warn(`Unknown runtime: '{runtime}' - defaulting to Luau!`)
+	end
 end
 
 export type VMEnvironment = typeof(VMEnvironment)

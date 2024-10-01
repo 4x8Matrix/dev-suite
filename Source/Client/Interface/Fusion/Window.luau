@@ -34,6 +34,11 @@ return function(scope: FusionTypes.Scope, props: {
 		selectedInstance: FusionTypes.Value<Instance>
 	},
 
+	sandbox: {
+		runtime: FusionTypes.Value<string>,
+		availableRuntimes: FusionTypes.Value<{ string }>,
+	},
+
 	signals: {
 		sandbox: {
 			evalServerCode: SignalTypes.Signal<string>,
@@ -126,6 +131,7 @@ return function(scope: FusionTypes.Scope, props: {
 								selectedPage = props.selectedPage,
 								signals = props.signals,
 								explorer = props.explorer,
+								sandbox = props.sandbox,
 
 								minimiseWindowRequested = function()
 									goalPosition:set(0)

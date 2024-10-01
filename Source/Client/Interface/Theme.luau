@@ -12,6 +12,8 @@ return {
 	TopbarLabelFont = Font.fromName(Enum.Font.Ubuntu.Name, Enum.FontWeight.ExtraBold),
 	TopbarLabelColor3 = Color3.fromRGB(114, 114, 114),
 
+	DropdownColor3 = Color3.fromHex("#111111"),
+
 	BaseLabelFont = Font.fromName(Enum.Font.Ubuntu.Name),
 	BaseLabelColor3 = Color3.fromRGB(255, 255, 255),
 

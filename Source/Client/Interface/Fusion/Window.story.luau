@@ -50,6 +50,15 @@ return function(parent)
 			selectedInstance = scope:Value(nil),
 		},
 
+		sandbox = {
+			runtime = scope:Value("Roblox"),
+			availableRuntimes = scope:Value({
+				"Roblox",
+				"Luau",
+				"Swift",
+			}),
+		},
+
 		signals = {
 			minimiseWindow = Signal.new(),
 

@@ -40,7 +40,7 @@ local Sandbox = {}
 	6. pcalls the generated luau state, allowing the luau code to execute.
 	7. returns if successful or not.
 ]]
-function Sandbox.Eval(_: Sandbox, source: string)
+function Sandbox.Eval(_: Sandbox, source: string, runtime: string)
 	local bytecode = LuauCeption.luau_compile(source, LUAU_OPTIMISATION_LEVEL, LUAU_DEBUG_LEVEL, LUAU_TYPE_INFO_LEVEL, LUAU_COVERAGE_LEVEL)
 	local luaState = VMBindings:LoadLuaState(bytecode)
 
@@ -51,9 +51,7 @@ function Sandbox.Eval(_: Sandbox, source: string)
 	VMContext:NewContext(luaState)
 
 	-- add/modify luau libraries
-	VMEnvironment:WriteSandboxGlobs(luaState)
-	VMEnvironment:WriteRobloxEnvironment(luaState)
-	VMEnvironment:WriteExploitEnvironment(luaState)
+	VMEnvironment:WriteSandboxGlobs(luaState, runtime)
 
 	-- sandbox luau environment
 	cFunctions.luaL_sandbox(luaState)
@@ -77,7 +75,7 @@ end
 
 function Sandbox.OnStart(self: Sandbox)
 	Interface.EvalClientCodeRequested:Connect(function(source: string)
-		self:Eval(source)
+		self:Eval(source, Interface:GetSelectedRuntime())
 	end)
 end
 

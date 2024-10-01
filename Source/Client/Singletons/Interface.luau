@@ -42,6 +42,11 @@ local hideIndicatorValue = indicatorScope:Value(nil)
 local clickToSelectValue = windowScope:Value(false)
 local highlightSelectedInstanceValue = windowScope:Value(false)
 
+local runtimeValue = windowScope:Value("Roblox")
+local availableRuntimesValue = windowScope:Value({
+	"Roblox", "Luau", "Swift"
+})
+
 local selectedInstanceValue = windowScope:Value(nil)
 
 local Interface = {}
@@ -100,6 +105,11 @@ function Interface.CreateInterface(self: Interface)
 		callbacks = {
 			showWindow = showWindowValue,
 			hideWindow = hideWindowValue
+		},
+
+		sandbox = {
+			runtime = runtimeValue,
+			availableRuntimes = availableRuntimesValue,
 		},
 
 		signals = {
@@ -201,6 +211,13 @@ end
 ]]
 function Interface.SetSelectedInstance(_: Interface, instance: Instance)
 	selectedInstanceValue:set(instance)
+end
+
+--[[
+	Responsible for setting the selected instance in the explorer tab.
+]]
+function Interface.GetSelectedRuntime(_: Interface): string
+	return Fusion.peek(runtimeValue)
 end
 
 function Interface.OnStart(self: Interface)
