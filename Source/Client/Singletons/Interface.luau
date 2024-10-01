@@ -39,6 +39,11 @@ local hideWindowValue = windowScope:Value(nil)
 local showIndicatorValue = indicatorScope:Value(nil)
 local hideIndicatorValue = indicatorScope:Value(nil)
 
+local clickToSelectValue = windowScope:Value(false)
+local highlightSelectedInstanceValue = windowScope:Value(false)
+
+local selectedInstanceValue = windowScope:Value(nil)
+
 local Interface = {}
 
 Interface.MinimiseWindowRequested = Signal.new()
@@ -47,15 +52,50 @@ Interface.OpenWindowRequested = Signal.new()
 Interface.EvalClientCodeRequested = Signal.new()
 Interface.EvalServerCodeRequested = Signal.new()
 
+Interface.ClickToSelectEnabled = Signal.new()
+Interface.ClickToSelectDisabled = Signal.new()
+
+Interface.HighlightSelectedInstanceEnabled = Signal.new()
+Interface.HighlightSelectedInstanceDisabled = Signal.new()
+
+Interface.SelectedInstanceChanged = Signal.new()
+
 --[[
 	This function will create both the Window + Indicator UI.
 ]]
 function Interface.CreateInterface(self: Interface)
 	local windowScreenGui = windowScope:Value(nil)
-
 	windowObject = Window(windowScope, {
 		screenGui = windowScreenGui,
 		selectedPage = windowScope:Value(nil),
+
+		explorer = {
+			instances = {
+				game:GetService("Workspace"),
+				game:GetService("Players"),
+				game:GetService("Lighting"),
+				game:GetService("MaterialService"),
+				game:GetService("ReplicatedFirst"),
+				game:GetService("ReplicatedStorage"),
+				game:GetService("ServerScriptService"),
+				game:GetService("ServerStorage"),
+				game:GetService("StarterGui"),
+				game:GetService("StarterPack"),
+				game:GetService("StarterPlayer"),
+				game:GetService("Teams"),
+				game:GetService("SoundService"),
+				game:GetService("Chat"),
+				game:GetService("TextChatService"),
+				game:GetService("LocalizationService"),
+				game:GetService("TestService"),
+				game:GetService("VRService")
+			},
+
+			clickToSelect = clickToSelectValue,
+			showSelection = highlightSelectedInstanceValue,
+
+			selectedInstance = selectedInstanceValue,
+		},
 
 		callbacks = {
 			showWindow = showWindowValue,
@@ -82,6 +122,32 @@ function Interface.CreateInterface(self: Interface)
 			openWindow = self.OpenWindowRequested
 		}
 	})
+
+	windowScope:Observer(clickToSelectValue):onChange(function()
+		local value = Fusion.peek(clickToSelectValue)
+
+		if value then
+			self.ClickToSelectEnabled:Fire()
+		else
+			self.ClickToSelectDisabled:Fire()
+		end
+	end)
+
+	windowScope:Observer(highlightSelectedInstanceValue):onChange(function()
+		local value = Fusion.peek(highlightSelectedInstanceValue)
+
+		if value then
+			self.HighlightSelectedInstanceEnabled:Fire()
+		else
+			self.HighlightSelectedInstanceDisabled:Fire()
+		end
+	end)
+
+	windowScope:Observer(selectedInstanceValue):onChange(function()
+		local value = Fusion.peek(highlightSelectedInstanceValue)
+
+		self.SelectedInstanceChanged:Fire(value)
+	end)
 
 	windowScreenGui:set(windowObject)
 
@@ -121,6 +187,20 @@ function Interface.DeactivateInterface(_: Interface)
 
 	Fusion.peek(hideWindowValue)()
 	Fusion.peek(showIndicatorValue)()
+end
+
+--[[
+	Returns the instance that is currently selected in the explorer.
+]]
+function Interface.GetSelectedInstance(_: Interface)
+	return Fusion.peek(selectedInstanceValue)
+end
+
+--[[
+	Responsible for setting the selected instance in the explorer tab.
+]]
+function Interface.SetSelectedInstance(_: Interface, instance: Instance)
+	selectedInstanceValue:set(instance)
 end
 
 function Interface.OnStart(self: Interface)

@@ -6,11 +6,19 @@ local Theme = require(Package.Client.Interface.Theme)
 
 local Fusion = require(Package.Parent.Fusion)
 
-return function(scope: FusionTypes.Scope, props: {
-	selectedPage: FusionTypes.Value<Frame>,
+local lastScope
+local lastFrame
+local lastRender
 
-	signals: { [any]: any }
+return function(scope: FusionTypes.Scope, props: {
+	[any]: any
 }): Frame
+	table.insert(scope, function()
+		if lastScope then
+			Fusion.doCleanup(lastScope)
+		end
+	end)
+
 	return scope:New("Frame")({
 		Size = UDim2.fromScale(1, 0.9),
 		Position = UDim2.fromScale(0, 0.1),
@@ -21,11 +29,25 @@ return function(scope: FusionTypes.Scope, props: {
 
 		[Fusion.Children] = {
 			scope:Computed(function(use)
-				local frame = scope.peek(props.selectedPage)
+				local frame = use(props.selectedPage)
+
+				if lastFrame == frame then
+					return lastRender
+				end
+
+				lastFrame = frame
+
+				local contentScope = Fusion.scoped(Fusion)
+
+				if lastScope then
+					Fusion.doCleanup(lastScope)
+				end
+
+				lastScope = contentScope
+
+				lastRender = frame and frame.Render(contentScope, props) or nil
 				
-				use(props.selectedPage)
-	
-				return frame and frame.Render(scope, props) or nil
+				return lastRender
 			end),
 		}
 	})

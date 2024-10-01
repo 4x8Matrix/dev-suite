@@ -53,6 +53,7 @@ function Sandbox.Eval(_: Sandbox, source: string)
 	-- add/modify luau libraries
 	VMEnvironment:WriteSandboxGlobs(luaState)
 	VMEnvironment:WriteRobloxEnvironment(luaState)
+	VMEnvironment:WriteExploitEnvironment(luaState)
 
 	-- sandbox luau environment
 	cFunctions.luaL_sandbox(luaState)

@@ -35,7 +35,7 @@ return function(luaState: VMBindings.LuaState, instance: Instance, deallocator: 
 
 	VMMacros.lua_newtable(luaState)
 	
-	writeMetaProperty(luaState, "__metatable", "The metatable is locked")
+	-- writeMetaProperty(luaState, "__metatable", "The metatable is locked")
 	writeMetaProperty(luaState, "__type", "Instance")
 
 	writeMetaMethod(luaState, "__tostring", function()

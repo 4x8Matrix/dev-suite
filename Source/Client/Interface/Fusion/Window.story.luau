@@ -12,7 +12,7 @@ return function(parent)
 	local selectedPage = scope:Value(nil)
 
 	local showWindowValue = scope:Value(nil)
-
+	
 	local windowObject = Window(scope, {
 		screenGui = screenGui,
 		selectedPage = selectedPage,
@@ -20,6 +20,34 @@ return function(parent)
 		callbacks = {
 			showWindow = showWindowValue,
 			hideWindow = scope:Value(nil),
+		},
+
+		explorer = {
+			instances = {
+				game:GetService("Workspace"),
+				game:GetService("Players"),
+				game:GetService("Lighting"),
+				game:GetService("MaterialService"),
+				game:GetService("ReplicatedFirst"),
+				game:GetService("ReplicatedStorage"),
+				game:GetService("ServerScriptService"),
+				game:GetService("ServerStorage"),
+				game:GetService("StarterGui"),
+				game:GetService("StarterPack"),
+				game:GetService("StarterPlayer"),
+				game:GetService("Teams"),
+				game:GetService("SoundService"),
+				game:GetService("Chat"),
+				game:GetService("TextChatService"),
+				game:GetService("LocalizationService"),
+				game:GetService("TestService"),
+				game:GetService("VRService")
+			},
+
+			clickToSelect = scope:Value(nil),
+			showSelection = scope:Value(nil),
+
+			selectedInstance = scope:Value(nil),
 		},
 
 		signals = {

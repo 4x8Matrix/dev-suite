@@ -41,11 +41,16 @@ end
 --[[
 	Responsible for wrapping a C function as a luau function, allowing you to create C functions in the Luau VM.
 ]]
-function VMBindings.LoadCFunction(_: VMBindings, luaState: LuaState, source: (state: LuaState, currentIndex: number) -> ()): Pointer
+function VMBindings.LoadCFunction(self: VMBindings, luaState: LuaState, source: (state: LuaState, currentIndex: number) -> ()): Pointer
 	local pointer = #LuauCeption.wasm.indirect_function_table.data + 1
 
 	LuauCeption.wasm.indirect_function_table.data[pointer] = function(currentIndex: number)
-		local result = source(luaState, currentIndex)
+		local status, result = pcall(source, luaState, currentIndex)
+
+		if not status then
+			warn(result)
+			self:Error(luaState, result)
+		end
 
 		return result
 	end

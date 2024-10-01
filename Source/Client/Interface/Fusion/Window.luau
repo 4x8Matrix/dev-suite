@@ -25,6 +25,15 @@ return function(scope: FusionTypes.Scope, props: {
 		hideWindow: FusionTypes.Value<() -> ()>,
 	},
 
+	explorer: {
+		instances: { Instance },
+
+		clickToSelect: FusionTypes.Value<boolean>,
+		showSelection: FusionTypes.Value<boolean>,
+
+		selectedInstance: FusionTypes.Value<Instance>
+	},
+
 	signals: {
 		sandbox: {
 			evalServerCode: SignalTypes.Signal<string>,
@@ -116,6 +125,7 @@ return function(scope: FusionTypes.Scope, props: {
 							ContentPanel = ContentPanel(scope, {
 								selectedPage = props.selectedPage,
 								signals = props.signals,
+								explorer = props.explorer,
 
 								minimiseWindowRequested = function()
 									goalPosition:set(0)

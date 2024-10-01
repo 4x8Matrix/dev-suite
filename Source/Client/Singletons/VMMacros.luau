@@ -10,7 +10,6 @@ local VMBindings = require(Package.Client.Singletons.VMBindings)
 
 local LUAI_MAXCSTACK = 8000
 local LUAU_GLOBALSINDEX = -LUAI_MAXCSTACK - 2002
-local LUA_REGISTRYINDEX = -LUAI_MAXCSTACK - 2000
 
 local cFunctions = LuauCeption.wasm.cfns
 
@@ -19,6 +18,11 @@ local VMMacros = {}
 -- #define lua_tonumber(luaState, i) lua_tonumberx(luaState, i, NULL)
 function VMMacros.lua_tonumber(luaState: VMBindings.LuaState, i: number)
 	return cFunctions.lua_tonumberx(luaState, i)
+end
+
+-- #define lua_upvalueindex(i) (LUA_GLOBALSINDEX - (i))
+function VMMacros.lua_upvalueindex(i: number)
+	return LUAU_GLOBALSINDEX - i
 end
 
 -- #define lua_tointeger(luaState, i) lua_tointegerx(luaState, i, NULL)
@@ -112,8 +116,8 @@ function VMMacros.lua_pushcfunction(luaState: VMBindings.LuaState, fn: number, d
 end
 
 -- #define lua_pushcclosure(L, fn, debugname, nup) lua_pushcclosurek(L, fn, debugname, nup, NULL)
-function VMMacros.lua_pushcclosure(_: VMBindings.LuaState)
-	-- idk 
+function VMMacros.lua_pushcclosure(luaState: VMBindings.LuaState, fn: number, nup: number)
+	cFunctions.lua_pushcclosurek(luaState, fn, 0, nup, 0)
 end
 
 -- #define lua_pushlightuserdata(L, p) lua_pushlightuserdatatagged(L, p, 0)
@@ -133,7 +137,7 @@ end
 
 -- #define lua_tostring(L, i) lua_tolstring(L, (i), NULL)
 function VMMacros.lua_tostring(luaState: VMBindings.LuaState, i: number)
-	return cFunctions.lua_tolstring(luaState, i)
+	return cFunctions.lua_tolstring(luaState, i, 0)
 end
 
 -- #define lua_pushfstring(L, fmt, ...) lua_pushfstringL(L, fmt, ##__VA_ARGS__)
@@ -151,9 +155,9 @@ function VMMacros.luaL_optstring(luaState: VMBindings.LuaState, n: number, d: nu
 	return cFunctions.luaL_optlstring(luaState, n, d, 0)
 end
 
--- #define luaL_getmetatable(L, n) (lua_getfield(L, LUA_REGISTRYINDEX, (n)))
-function VMMacros.luaL_getmetatable(luaState: VMBindings.LuaState, n: number)
-	return cFunctions.lua_getfield(luaState, LUA_REGISTRYINDEX, n)
+-- LUA_API void lua_getfenv(lua_State* L, int idx);
+function VMMacros.lua_getfenv(luaState: VMBindings.LuaState, i: number)
+	return LuauCeption.wasm.indirect_function_table.data[480](luaState, i)
 end
 
 export type LuaState = number
