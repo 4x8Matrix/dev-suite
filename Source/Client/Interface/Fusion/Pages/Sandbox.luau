@@ -1,9 +1,8 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
 local Package = script.Parent.Parent.Parent.Parent.Parent
 
-local Sift = require(ReplicatedStorage.Packages.Sift)
+local Sift = require(Package.Parent.Sift)
 local FusionTypes = require(Package.Types.Fusion)
 local PageTypes = require(Package.Types.Page)
 local SignalTypes = require(Package.Types.Signal)
