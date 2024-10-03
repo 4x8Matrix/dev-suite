@@ -39,10 +39,34 @@ return function(scope: FusionTypes.Scope, props: {
 		availableRuntimes: FusionTypes.Value<{ string }>,
 	},
 
+	interceptor: {
+		intercepted: FusionTypes.Value<{
+			eventType: "RemoteEvent" | "BindableEvent" | "RemoteFunction" | "BindableFunction",
+			eventUUID: string?,
+
+			eventName: string,
+			eventData: string,
+			eventSize: string,
+
+			ancestors: {
+				{
+					class: string,
+					name: string
+				}
+			},
+
+			context: "Server" | "Client",
+		}>
+	},
+
 	signals: {
 		sandbox: {
 			evalServerCode: SignalTypes.Signal<string>,
 			evalClientCode: SignalTypes.Signal<string>,
+		},
+
+		interceptor: {
+			repeatEvent: SignalTypes.Signal<string>,
 		},
 	
 		minimiseWindow: SignalTypes.Signal<()>,
@@ -132,6 +156,7 @@ return function(scope: FusionTypes.Scope, props: {
 								signals = props.signals,
 								explorer = props.explorer,
 								sandbox = props.sandbox,
+								interceptor = props.interceptor,
 
 								minimiseWindowRequested = function()
 									goalPosition:set(0)

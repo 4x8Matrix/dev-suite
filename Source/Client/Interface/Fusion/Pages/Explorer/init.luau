@@ -217,7 +217,7 @@ function Explorer.Render(scope: Scope, props: Props)
 							}),
 
 							ImageLabe = ImageLabel(scope, {
-								Image = Theme.Selectioncon,
+								Image = Theme.SelectionIcon,
 								ImageTransparency = scope:Computed(function(use)
 									local isEnabled = use(props.explorer.showSelection)
 		

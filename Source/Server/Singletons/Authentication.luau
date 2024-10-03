@@ -1,3 +1,5 @@
+local Players = game:GetService("Players")
+
 local Package = script.Parent.Parent.Parent
 
 local Console = require(Package.Parent.Console)
@@ -31,6 +33,18 @@ function Authentication.Validate(self: Authentication, player: Player, ...): boo
 	assert(self:IsAuthenticated(player), `Player '{player.Name}' is not authenticated.`)
 
 	return ...
+end
+
+function Authentication.GetListOfAuthenticatedPlayers(self: Authentication): { Player }
+	local authenticated = {}
+	
+	for _, player in Players:GetPlayers() do
+		if self:IsAuthenticated(player) then
+			table.insert(authenticated, player)
+		end
+	end
+
+	return authenticated
 end
 
 function Authentication.OnStart(self: Authentication)

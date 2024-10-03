@@ -38,6 +38,7 @@ local MEMBER_TYPE_TEXT_COLORS = table.freeze({
 
 local currentlyRenderingInstance
 local fusionValue
+local hasRenderedEmptyPage = false
 
 local Properties = {}
 
@@ -281,8 +282,47 @@ function Properties.Setup(_: FusionTypes.Scope, value: FusionTypes.Value<Instanc
 	fusionValue = value
 end
 
+function Properties.RenderEmptyPage(scope: FusionTypes.Scope, scrollingFrame: ScrollingFrame)
+	scope:New("Frame")({
+		Parent = scrollingFrame,
+		Size = UDim2.fromScale(0.9, 0.9),
+
+		BackgroundTransparency = 1,
+
+		[Fusion.Children] = {
+			-- UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({}),
+
+			ImageLabel = ImageLabel(scope, {
+				Size = UDim2.fromScale(0.8, 0.8),
+				Position = UDim2.fromScale(0.15, 0.15),
+				
+				Image = Theme.PropertiesIcon,
+				ImageTransparency = 0.5,
+		
+				[Fusion.Children] = {
+					UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({})
+				}
+			}),
+
+			TextLabel = TextLabel(scope, {
+				Size = UDim2.fromScale(0.8, 0.15),
+				Position = UDim2.fromScale(0.15, 0.75),
+
+				Text = "Select an Object to view the properties of that Object.",
+				TextTransparency = 0.5,
+			})
+		}
+	})
+end
+
 function Properties.Render(scope: FusionTypes.Scope, scrollingFrame: ScrollingFrame)
 	local instance = Fusion.peek(fusionValue)
+
+	if not instance and not hasRenderedEmptyPage then
+		hasRenderedEmptyPage = true
+
+		Properties.RenderEmptyPage(scope, scrollingFrame)
+	end
 	
 	if currentlyRenderingInstance == instance then
 		return

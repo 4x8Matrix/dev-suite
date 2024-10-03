@@ -50,6 +50,12 @@ return function(parent)
 			selectedInstance = scope:Value(nil),
 		},
 
+		interceptor = {
+			intercepted = scope:Value({
+				
+			})
+		},
+
 		sandbox = {
 			runtime = scope:Value("Roblox"),
 			availableRuntimes = scope:Value({
@@ -64,7 +70,11 @@ return function(parent)
 
 			sandbox = {
 				evalClientCode = Signal.new(),
-				evalServerCode = Signal.new()
+				evalServerCode = Signal.new(),
+			},
+
+			interceptor = {
+				repeatEvent = Signal.new()
 			}
 		}
 	})

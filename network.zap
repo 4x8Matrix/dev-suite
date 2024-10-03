@@ -1,10 +1,16 @@
 opt server_output = "Source/Server/Network.luau"
 opt client_output = "Source/Client/Network.luau"
-opt remote_scope = "DEBUG_REMOYES"
+opt remote_scope = "DEBUG_REMOTES"
 opt casing = "PascalCase"
 
 type SettingOptions = struct {
     DefaultHotkey: string
+}
+
+type RemoteEvenRelay = struct {
+    arguments: string,
+    instances: Instance[],
+    event: Instance,
 }
 
 funct AuthenticateRequested = {
@@ -22,4 +28,11 @@ event ServerSettingsUpdated = {
 	type: Reliable,
 	call: SingleAsync,
     data: SettingOptions
+}
+
+event ServerRemotesFired = {
+	from: Server,
+	type: Reliable,
+	call: ManyAsync,
+    data: RemoteEvenRelay
 }

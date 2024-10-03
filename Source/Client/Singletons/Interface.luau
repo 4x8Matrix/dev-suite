@@ -14,6 +14,8 @@
 ]]
 
 local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+
 local Package = script.Parent.Parent.Parent
 
 local Hotkeys = require(Package.Client.Singletons.Hotkeys)
@@ -23,6 +25,8 @@ local Indicator = require(Package.Client.Interface.Fusion.Indicator)
 
 local Fusion = require(Package.Parent.Fusion)
 local Signal = require(Package.Parent.Signal)
+
+local MAX_REMOTES_REGISTERED = 100
 
 local isInterfaceOpen = false
 local isProcessingRequest = false
@@ -42,12 +46,16 @@ local hideIndicatorValue = indicatorScope:Value(nil)
 local clickToSelectValue = windowScope:Value(false)
 local highlightSelectedInstanceValue = windowScope:Value(false)
 
+local interceptedRemotesArray = windowScope:Value({})
+
 local runtimeValue = windowScope:Value("Roblox")
 local availableRuntimesValue = windowScope:Value({
 	"Roblox", "Luau", "Swift"
 })
 
 local selectedInstanceValue = windowScope:Value(nil)
+
+local remoteEventUUIDs = {}
 
 local Interface = {}
 
@@ -64,6 +72,8 @@ Interface.HighlightSelectedInstanceEnabled = Signal.new()
 Interface.HighlightSelectedInstanceDisabled = Signal.new()
 
 Interface.SelectedInstanceChanged = Signal.new()
+
+Interface.RepeatRemoteEventCallRequested = Signal.new()
 
 --[[
 	This function will create both the Window + Indicator UI.
@@ -107,6 +117,10 @@ function Interface.CreateInterface(self: Interface)
 			hideWindow = hideWindowValue
 		},
 
+		interceptor = {
+			intercepted = interceptedRemotesArray,
+		},
+
 		sandbox = {
 			runtime = runtimeValue,
 			availableRuntimes = availableRuntimesValue,
@@ -118,6 +132,10 @@ function Interface.CreateInterface(self: Interface)
 			sandbox = {
 				evalClientCode = self.EvalClientCodeRequested,
 				evalServerCode = self.EvalServerCodeRequested
+			},
+
+			interceptor = {
+				repeatEvent = self.RepeatRemoteEventCallRequested
 			}
 		}
 	})
@@ -220,6 +238,54 @@ function Interface.GetSelectedRuntime(_: Interface): string
 	return Fusion.peek(runtimeValue)
 end
 
+--[[
+	Responsible for setting the selected instance in the explorer tab.
+]]
+function Interface.AddRemoteEventInvoke(_: Interface, options: {
+	event: RemoteEvent | RemoteFunction,
+	arguments: { any },
+	context: "Server" | "Client",
+	callbackFunction: () -> ()?
+})
+	local array = Fusion.peek(interceptedRemotesArray)
+
+	local object = {}
+	local ancestorTree = {}
+
+	local parent = options.event.Parent
+
+	while parent ~= game do
+		table.insert(ancestorTree, {
+			name = parent.Name,
+			class = parent.ClassName
+		})
+
+		parent = parent.Parent
+	end
+
+	object.eventType = options.event.ClassName
+	object.eventUUID = HttpService:GenerateGUID()
+	object.eventName = options.event.Name
+	object.eventData = HttpService:JSONEncode(options.arguments)
+	object.eventSize = `{string.len(object.eventData) / 1000}kb`
+	object.ancestors = ancestorTree
+	object.context = options.context
+
+	remoteEventUUIDs[object.eventUUID] = options.callbackFunction
+
+	if #array + 1 > MAX_REMOTES_REGISTERED then
+		local removedObject = table.remove(array, #array)
+
+		if removedObject.eventUUID then
+			remoteEventUUIDs[removedObject.eventUUID] = nil
+		end
+	end
+
+	table.insert(array, 1, object)
+
+	interceptedRemotesArray:set(array)
+end
+
 function Interface.OnStart(self: Interface)
 	self:CreateInterface()
 
@@ -229,6 +295,14 @@ function Interface.OnStart(self: Interface)
 
 	self.OpenWindowRequested:Connect(function()
 		self:ActivateInterface()
+	end)
+
+	self.RepeatRemoteEventCallRequested:Connect(function(eventUUID: string)
+		if remoteEventUUIDs[eventUUID] then
+			remoteEventUUIDs[eventUUID]()
+		else
+			warn(`Unable to find remote event callback responsible for: '{eventUUID}'`)
+		end
 	end)
 
 	Hotkeys.OnHotkeyPressed:Connect(function()

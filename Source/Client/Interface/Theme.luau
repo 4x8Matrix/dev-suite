@@ -38,6 +38,10 @@ return {
 	BottomScrollingFrameIcon = `http://www.roblox.com/asset/?id=135686768300117`,
 
 	DropdownArrowIcon = `http://www.roblox.com/asset/?id=91919367883017`,
+	StraightArrowIcon = `http://www.roblox.com/asset/?id=73426420511004`,
+
+	ServerIcon = `http://www.roblox.com/asset/?id=79914132215539`,
+	ClientIcon = `http://www.roblox.com/asset/?id=78104343425890`,
 
 	MinimiseIcon = `http://www.roblox.com/asset/?id=103506812514902`,
 	DevSuiteIcon = `http://www.roblox.com/asset/?id=133189525814836`,
@@ -47,13 +51,15 @@ return {
 	EmbeddedIcon = `http://www.roblox.com/asset/?id=91743480578016`,
 	ExplorerIcon = `http://www.roblox.com/asset/?id=116244663538470`,
 	InspectorIcon =`http://www.roblox.com/asset/?id=132722856457587`,
-	IntercepterIcon = `http://www.roblox.com/asset/?id=82710547910298`,
+	InterceptorIcon = `http://www.roblox.com/asset/?id=82710547910298`,
 	LiveEventsIcon = `http://www.roblox.com/asset/?id=89592417172377`,
 	LoggingIcon = `http://www.roblox.com/asset/?id=71965170319925`,
 	StatisticsIcon = `http://www.roblox.com/asset/?id=105773589734060`,
 	PerformanceIcon = `http://www.roblox.com/asset/?id=126479063941214`,
 
 	TabIcon = `http://www.roblox.com/asset/?id=135396811830334`,
+	QuestionIcon = `http://www.roblox.com/asset/?id=82261841272265`,
+	RepeatIcon = `http://www.roblox.com/asset/?id=117634959424560`,
 
 	PlayIcon = `http://www.roblox.com/asset/?id=123356194161843`,
 	RestartIcon = `http://www.roblox.com/asset/?id=128203851153594`,
@@ -63,5 +69,7 @@ return {
 	PropertyIcon = `http://www.roblox.com/asset/?id=101344281875867`,
 
 	PointerIcon = `http://www.roblox.com/asset/?id=73809779520162`,
-	Selectioncon = `http://www.roblox.com/asset/?id=74544478147788`
+	SelectionIcon = `http://www.roblox.com/asset/?id=74544478147788`,
+
+	PropertiesIcon = `http://www.roblox.com/asset/?id=121668548193381`
 }
