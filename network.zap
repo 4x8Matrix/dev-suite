@@ -13,6 +13,12 @@ type RemoteEvenRelay = struct {
     event: Instance,
 }
 
+type Log = struct {
+    message: string,
+	type: string,
+	time: u32
+}
+
 funct AuthenticateRequested = {
     call: Async,
     rets: enum { Accepted, Rejected },
@@ -35,4 +41,18 @@ event ServerRemotesFired = {
 	type: Reliable,
 	call: ManyAsync,
     data: RemoteEvenRelay
+}
+
+event ServerReportingLogs = {
+	from: Server,
+	type: Reliable,
+	call: ManyAsync,
+    data: Log[]
+}
+
+event ClientReportingLogs = {
+	from: Client,
+	type: Reliable,
+	call: ManyAsync,
+    data: Log[]
 }

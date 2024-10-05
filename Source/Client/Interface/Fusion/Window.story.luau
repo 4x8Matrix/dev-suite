@@ -50,6 +50,15 @@ return function(parent)
 			selectedInstance = scope:Value(nil),
 		},
 
+		logging = {
+			logs = scope:Value({
+				
+			}),
+
+			sortOrder = scope:Value("Time"),
+			context = scope:Value("Client")
+		},
+
 		interceptor = {
 			intercepted = scope:Value({
 				
@@ -67,6 +76,12 @@ return function(parent)
 
 		signals = {
 			minimiseWindow = Signal.new(),
+
+			logging = {
+				exportLogs = Signal.new(),
+				clearLogs = Signal.new(),
+				breakpointLogs = Signal.new()
+			},
 
 			sandbox = {
 				evalClientCode = Signal.new(),

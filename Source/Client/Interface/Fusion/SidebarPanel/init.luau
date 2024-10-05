@@ -14,7 +14,7 @@ local Button = require(Package.Client.Interface.Components.Button)
 local Sift = require(Package.Parent.Sift)
 local Fusion = require(Package.Parent.Fusion)
 
-local DEBUG_DEFAULT_MENU = nil -- `Interceptor`
+local DEBUG_DEFAULT_MENU = `Logging`
 
 return function(scope: FusionTypes.Scope, props: {
 	selectedPage: FusionTypes.Value<PageTypes.PageElement<FusionTypes.Scope, any>>,
@@ -158,7 +158,5 @@ return function(scope: FusionTypes.Scope, props: {
 				}
 			})
 		}
-
-	
 	})
 end

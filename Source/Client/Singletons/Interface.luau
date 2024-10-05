@@ -47,6 +47,7 @@ local clickToSelectValue = windowScope:Value(false)
 local highlightSelectedInstanceValue = windowScope:Value(false)
 
 local interceptedRemotesArray = windowScope:Value({})
+local logsArray = windowScope:Value({})
 
 local runtimeValue = windowScope:Value("Roblox")
 local availableRuntimesValue = windowScope:Value({
@@ -71,6 +72,10 @@ Interface.ClickToSelectDisabled = Signal.new()
 Interface.HighlightSelectedInstanceEnabled = Signal.new()
 Interface.HighlightSelectedInstanceDisabled = Signal.new()
 
+Interface.ExportLogsRequested = Signal.new()
+Interface.ClearLogsRequested = Signal.new()
+Interface.BreakpointLogsRequested = Signal.new()
+
 Interface.SelectedInstanceChanged = Signal.new()
 
 Interface.RepeatRemoteEventCallRequested = Signal.new()
@@ -83,6 +88,13 @@ function Interface.CreateInterface(self: Interface)
 	windowObject = Window(windowScope, {
 		screenGui = windowScreenGui,
 		selectedPage = windowScope:Value(nil),
+
+		logging = {
+			logs = logsArray,
+
+			sortOrder = windowScope:Value("Time"),
+			context = windowScope:Value("Server")
+		},
 
 		explorer = {
 			instances = {
@@ -128,6 +140,12 @@ function Interface.CreateInterface(self: Interface)
 
 		signals = {
 			minimiseWindow = self.MinimiseWindowRequested,
+
+			logging = {
+				exportLogs = self.ExportLogsRequested,
+				clearLogs = self.ClearLogsRequested,
+				breakpointLogs = self.BreakpointLogsRequested,
+			},
 
 			sandbox = {
 				evalClientCode = self.EvalClientCodeRequested,
@@ -236,6 +254,13 @@ end
 ]]
 function Interface.GetSelectedRuntime(_: Interface): string
 	return Fusion.peek(runtimeValue)
+end
+
+--[[
+	Responsible for setting the selected instance in the explorer tab.
+]]
+function Interface.SetLogs(_: Interface, logs: { [any]: any })
+	logsArray:set(logs)
 end
 
 --[[

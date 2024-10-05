@@ -33,6 +33,11 @@ return {
 	EnumColor = Color3.fromRGB(0, 183, 255),
 	InstanceColor = Color3.fromHex("#99cdff"),
 
+	OutputLogColor = Color3.fromHex("#c2c2c2"),
+	OutputWarnColor = Color3.fromHex("#ff8e3c"),
+	OutputErrorColor = Color3.fromHex("#ff4444"),
+	OutputInformationColor = Color3.fromHex("#80d6fe"),
+
 	MiddleScrollingFrameIcon = `http://www.roblox.com/asset/?id=123032894572732`,
 	TopScrollingFrameIcon = `http://www.roblox.com/asset/?id=95175423103608`,
 	BottomScrollingFrameIcon = `http://www.roblox.com/asset/?id=135686768300117`,

@@ -9,6 +9,8 @@ local Network = require(Package.Server.Network)
 local evaluationCache: { [number]: boolean } = { }
 local reporter = Console.new(script.Name)
 
+local hasWarned = false
+
 local Authentication = {}
 
 Authentication.AuthenticationCallback = nil :: ((Player) -> boolean)? 
@@ -24,7 +26,11 @@ function Authentication.IsAuthenticated(self: Authentication, player: Player): b
 		return evaluationCache[player.UserId]
 	end
 
-	reporter:Warn(`Authentication callback not set, authenticating player '{player.Name}' as authenticated.`)
+	if not hasWarned then
+		reporter:Warn(`Authentication callback not set, authenticating player '{player.Name}' as authenticated.`)
+
+		hasWarned = true
+	end
 
 	return true
 end

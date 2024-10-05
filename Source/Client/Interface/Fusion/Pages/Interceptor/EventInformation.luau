@@ -6,6 +6,7 @@ local ClassIndex = require(Package.Parent.ClassIndex)
 
 local Button = require(Package.Client.Interface.Components.Button)
 local ImageLabel = require(Package.Client.Interface.Components.ImageLabel)
+local TextBox = require(Package.Client.Interface.Components.TextBox)
 local TextLabel = require(Package.Client.Interface.Components.TextLabel)
 local UICorner = require(Package.Client.Interface.Components.UICorner)
 local UIPadding = require(Package.Client.Interface.Components.UIPadding)
@@ -306,7 +307,7 @@ function EventList.Render(scope: FusionTypes.Scope, _: any, focusedEvent: Fusion
 								paddingHeight = UDim.new(0.1, 0)
 							}),
 
-							TextBox = scope:New("TextBox")({
+							TextBox = TextBox(scope, {
 								Size = UDim2.fromScale(1, 1),
 								TextEditable = false,
 								TextXAlignment = Enum.TextXAlignment.Left,

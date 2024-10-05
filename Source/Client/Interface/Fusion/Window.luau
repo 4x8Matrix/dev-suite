@@ -58,6 +58,21 @@ return function(scope: FusionTypes.Scope, props: {
 			context: "Server" | "Client",
 		}>
 	},
+	
+	logging: {
+		sortOrder: FusionTypes.Value<"Alphabetical" | "Time" | "Priority">,
+		context: FusionTypes.Value<"Server" | "Client">,
+
+		logs: FusionTypes.Value<{
+			{
+				message: string,
+				type: Enum.MessageType,
+				context: "Server" | "Client",
+				time: number,
+				count: number,
+			}
+		}>
+	},
 
 	signals: {
 		sandbox: {
@@ -67,6 +82,12 @@ return function(scope: FusionTypes.Scope, props: {
 
 		interceptor: {
 			repeatEvent: SignalTypes.Signal<string>,
+		},
+
+		logging: {
+			exportLogs: SignalTypes.Signal<()>,
+			clearLogs: SignalTypes.Signal<()>,
+			breakpointLogs: SignalTypes.Signal<()>
 		},
 	
 		minimiseWindow: SignalTypes.Signal<()>,
@@ -157,6 +178,7 @@ return function(scope: FusionTypes.Scope, props: {
 								explorer = props.explorer,
 								sandbox = props.sandbox,
 								interceptor = props.interceptor,
+								logging = props.logging,
 
 								minimiseWindowRequested = function()
 									goalPosition:set(0)
