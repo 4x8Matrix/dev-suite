@@ -74,6 +74,10 @@ return function(parent)
 			}),
 		},
 
+		liveEvents = {
+			events = scope:Value({ })
+		},
+
 		signals = {
 			minimiseWindow = Signal.new(),
 

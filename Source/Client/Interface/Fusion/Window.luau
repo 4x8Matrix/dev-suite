@@ -39,6 +39,17 @@ return function(scope: FusionTypes.Scope, props: {
 		availableRuntimes: FusionTypes.Value<{ string }>,
 	},
 
+	liveEvents: {
+		events: FusionTypes.Value<{
+			{
+				instanceName: string,
+				className: string,
+				propertyName: string,
+				propertyValue: any,
+			}
+		}>
+	},
+
 	interceptor: {
 		intercepted: FusionTypes.Value<{
 			eventType: "RemoteEvent" | "BindableEvent" | "RemoteFunction" | "BindableFunction",
@@ -179,6 +190,7 @@ return function(scope: FusionTypes.Scope, props: {
 								sandbox = props.sandbox,
 								interceptor = props.interceptor,
 								logging = props.logging,
+								liveEvents = props.liveEvents,
 
 								minimiseWindowRequested = function()
 									goalPosition:set(0)

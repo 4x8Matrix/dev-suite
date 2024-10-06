@@ -48,6 +48,7 @@ local highlightSelectedInstanceValue = windowScope:Value(false)
 
 local interceptedRemotesArray = windowScope:Value({})
 local logsArray = windowScope:Value({})
+local eventsArray = windowScope:Value({})
 
 local runtimeValue = windowScope:Value("Roblox")
 local availableRuntimesValue = windowScope:Value({
@@ -122,6 +123,10 @@ function Interface.CreateInterface(self: Interface)
 			showSelection = highlightSelectedInstanceValue,
 
 			selectedInstance = selectedInstanceValue,
+		},
+
+		liveEvents = {
+			events = eventsArray,
 		},
 
 		callbacks = {
@@ -250,17 +255,24 @@ function Interface.SetSelectedInstance(_: Interface, instance: Instance)
 end
 
 --[[
-	Responsible for setting the selected instance in the explorer tab.
+	
 ]]
 function Interface.GetSelectedRuntime(_: Interface): string
 	return Fusion.peek(runtimeValue)
 end
 
 --[[
-	Responsible for setting the selected instance in the explorer tab.
+	Responsible for setting the selected instance in the logs tab
 ]]
 function Interface.SetLogs(_: Interface, logs: { [any]: any })
 	logsArray:set(logs)
+end
+
+--[[
+	Responsible for setting the selected instance in the live events tab.
+]]
+function Interface.SetLiveEvents(_: Interface, events: { [any]: any })
+	eventsArray:set(events)
 end
 
 --[[
