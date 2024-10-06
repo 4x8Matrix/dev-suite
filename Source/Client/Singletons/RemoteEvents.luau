@@ -7,7 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Package = script.Parent.Parent.Parent
 
-local decodeFromJSON = require(ReplicatedStorage.Packages.DevSuite.Utilities.Remotes.decodeFromJSON)
+local decodeFromJSON = require(Package.Utilities.Remotes.decodeFromJSON)
 local Network = require(Package.Client.Network)
 
 local Interface = require(Package.Client.Singletons.Interface)

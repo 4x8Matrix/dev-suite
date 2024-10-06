@@ -1,7 +1,6 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Package = script.Parent.Parent.Parent.Parent
 
-local Theme = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Theme)
+local Theme = require(Package.Client.Interface.Theme)
 local FusionTypes = require(Package.Types.Fusion)
 
 local Sift = require(Package.Parent.Sift)
