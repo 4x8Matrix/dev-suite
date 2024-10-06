@@ -28,7 +28,7 @@ local VALUE_TYPE_TEXT_COLORS = table.freeze({
 local LiveEvents = {}
 
 LiveEvents.DisplayName = `LiveEvents`
-LiveEvents.DisplayOrder = 6
+LiveEvents.DisplayOrder = 7
 LiveEvents.DisplayIcon = Theme.LiveEventsIcon
 LiveEvents.Enabled = true
 

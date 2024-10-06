@@ -22,7 +22,7 @@ local Fusion = require(Package.Parent.Fusion)
 local Logging = {}
 
 Logging.DisplayName = `Logging`
-Logging.DisplayOrder = 5
+Logging.DisplayOrder = 3
 Logging.DisplayIcon = Theme.LoggingIcon
 Logging.Enabled = true
 

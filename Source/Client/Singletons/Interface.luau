@@ -14,7 +14,6 @@
 ]]
 
 local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
 
 local Package = script.Parent.Parent.Parent
 
@@ -25,9 +24,6 @@ local Indicator = require(Package.Client.Interface.Fusion.Indicator)
 
 local Fusion = require(Package.Parent.Fusion)
 local Signal = require(Package.Parent.Signal)
-
-local MAX_REMOTES_REGISTERED = 100
-
 local isInterfaceOpen = false
 local isProcessingRequest = false
 
@@ -50,14 +46,14 @@ local interceptedRemotesArray = windowScope:Value({})
 local logsArray = windowScope:Value({})
 local eventsArray = windowScope:Value({})
 
+local selectedPage = windowScope:Value(nil)
+
 local runtimeValue = windowScope:Value("Roblox")
 local availableRuntimesValue = windowScope:Value({
 	"Roblox", "Luau", "Swift"
 })
 
 local selectedInstanceValue = windowScope:Value(nil)
-
-local remoteEventUUIDs = {}
 
 local Interface = {}
 
@@ -88,7 +84,7 @@ function Interface.CreateInterface(self: Interface)
 	local windowScreenGui = windowScope:Value(nil)
 	windowObject = Window(windowScope, {
 		screenGui = windowScreenGui,
-		selectedPage = windowScope:Value(nil),
+		selectedPage = selectedPage,
 
 		logging = {
 			logs = logsArray,
@@ -275,52 +271,12 @@ function Interface.SetLiveEvents(_: Interface, events: { [any]: any })
 	eventsArray:set(events)
 end
 
---[[
-	Responsible for setting the selected instance in the explorer tab.
-]]
-function Interface.AddRemoteEventInvoke(_: Interface, options: {
-	event: RemoteEvent | RemoteFunction,
-	arguments: { any },
-	context: "Server" | "Client",
-	callbackFunction: () -> ()?
-})
-	local array = Fusion.peek(interceptedRemotesArray)
+function Interface.SetSelectedPage(_: Interface, pageName: string)
+	selectedPage:set(require(Package.Client.Interface.Fusion.Pages[pageName]))
+end
 
-	local object = {}
-	local ancestorTree = {}
-
-	local parent = options.event.Parent
-
-	while parent ~= game do
-		table.insert(ancestorTree, {
-			name = parent.Name,
-			class = parent.ClassName
-		})
-
-		parent = parent.Parent
-	end
-
-	object.eventType = options.event.ClassName
-	object.eventUUID = HttpService:GenerateGUID()
-	object.eventName = options.event.Name
-	object.eventData = HttpService:JSONEncode(options.arguments)
-	object.eventSize = `{string.len(object.eventData) / 1000}kb`
-	object.ancestors = ancestorTree
-	object.context = options.context
-
-	remoteEventUUIDs[object.eventUUID] = options.callbackFunction
-
-	if #array + 1 > MAX_REMOTES_REGISTERED then
-		local removedObject = table.remove(array, #array)
-
-		if removedObject.eventUUID then
-			remoteEventUUIDs[removedObject.eventUUID] = nil
-		end
-	end
-
-	table.insert(array, 1, object)
-
-	interceptedRemotesArray:set(array)
+function Interface.SetInterceptedRemotes(_: Interface, events: { [any]: any })
+	interceptedRemotesArray:set(events)
 end
 
 function Interface.OnStart(self: Interface)
@@ -332,14 +288,6 @@ function Interface.OnStart(self: Interface)
 
 	self.OpenWindowRequested:Connect(function()
 		self:ActivateInterface()
-	end)
-
-	self.RepeatRemoteEventCallRequested:Connect(function(eventUUID: string)
-		if remoteEventUUIDs[eventUUID] then
-			remoteEventUUIDs[eventUUID]()
-		else
-			warn(`Unable to find remote event callback responsible for: '{eventUUID}'`)
-		end
 	end)
 
 	Hotkeys.OnHotkeyPressed:Connect(function()

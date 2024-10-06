@@ -10,7 +10,7 @@ local Fusion = require(Package.Parent.Fusion)
 local Embedded = {}
 
 Embedded.DisplayName = `Embedded`
-Embedded.DisplayOrder = 8
+Embedded.DisplayOrder = 11
 Embedded.DisplayIcon = Theme.EmbeddedIcon
 Embedded.Enabled = false
 

@@ -17,6 +17,7 @@ local VMEnvironment = require(Package.Client.Singletons.VMEnvironment)
 local VMContext = require(Package.Client.Singletons.VMContext)
 
 local Interface = require(Package.Client.Singletons.Interface)
+local Logging = require(Package.Client.Singletons.Logging)
 
 local LUAU_OPTIMISATION_LEVEL = 1
 local LUAU_DEBUG_LEVEL = 1
@@ -75,6 +76,9 @@ end
 
 function Sandbox.OnStart(self: Sandbox)
 	Interface.EvalClientCodeRequested:Connect(function(source: string)
+		Logging:Breakpoint()
+		Interface:SetSelectedPage("Logging")
+
 		self:Eval(source, Interface:GetSelectedRuntime())
 	end)
 end

@@ -10,7 +10,7 @@ local Fusion = require(Package.Parent.Fusion)
 local Performance = {}
 
 Performance.DisplayName = `Performance`
-Performance.DisplayOrder = 10
+Performance.DisplayOrder = 9
 Performance.DisplayIcon = Theme.PerformanceIcon
 Performance.Enabled = false
 

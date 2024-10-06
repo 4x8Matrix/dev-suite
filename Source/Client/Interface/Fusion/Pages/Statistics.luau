@@ -10,7 +10,7 @@ local Fusion = require(Package.Parent.Fusion)
 local Statistics = {}
 
 Statistics.DisplayName = `Statistics`
-Statistics.DisplayOrder = 11
+Statistics.DisplayOrder = 8
 Statistics.DisplayIcon = Theme.StatisticsIcon
 Statistics.Enabled = false
 

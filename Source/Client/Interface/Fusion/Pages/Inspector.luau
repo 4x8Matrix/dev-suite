@@ -10,7 +10,7 @@ local Fusion = require(Package.Parent.Fusion)
 local Inspector = {}
 
 Inspector.DisplayName = `Inspector`
-Inspector.DisplayOrder = 9
+Inspector.DisplayOrder = 6
 Inspector.DisplayIcon = Theme.InspectorIcon
 Inspector.Enabled = false
 

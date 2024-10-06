@@ -52,6 +52,10 @@ function Logging.ReserveMemory(_: Logging)
 	end
 end
 
+function Logging.Breakpoint(_: Logging)
+	warn(`--[[ {string.rep(`-`, 65)} ]]--`)
+end
+
 function Logging.OnServerLogReceived(self: Logging, message: string, type: string, time: number)
 	local messageType = Enum.MessageType
 
@@ -127,9 +131,7 @@ function Logging.OnStart(self: Logging)
 	end)
 
 	Interface.BreakpointLogsRequested:Connect(function()
-		warn(string.rep(`-`, 100))
-		print(`BREAKPOINT`)
-		warn(string.rep(`-`, 100))
+		self:Breakpoint()
 	end)
 
 	while true do

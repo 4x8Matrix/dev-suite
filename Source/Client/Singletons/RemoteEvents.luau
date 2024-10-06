@@ -2,17 +2,48 @@
 	
 ]]
 
+local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Package = script.Parent.Parent.Parent
 
+local decodeFromJSON = require(ReplicatedStorage.Packages.DevSuite.Utilities.Remotes.decodeFromJSON)
 local Network = require(Package.Client.Network)
-
-local decodeFromJSON = require(Package.Utilities.Remotes.decodeFromJSON)
 
 local Interface = require(Package.Client.Singletons.Interface)
 
+local MAXIMUM_REMOTE_COUNT = 10000
+
+local updateInterfaceThread
+
+local remoteEventArray = {}
+local remoteEventCallbacks = {}
+
 local RemoteEvents = {}
+
+function RemoteEvents.UpdateInterface(_: RemoteEvents, noDelay: boolean?)
+	if updateInterfaceThread then
+		task.cancel(updateInterfaceThread)
+	end
+
+	updateInterfaceThread = task.delay(noDelay and 0 or 0.05, function()
+		updateInterfaceThread = nil
+
+		Interface:SetInterceptedRemotes(remoteEventArray)
+	end)
+end
+
+function RemoteEvents.ReserveMemory(_: RemoteEvents)
+	local totalCount = #remoteEventArray
+
+	if totalCount > MAXIMUM_REMOTE_COUNT then
+		local object = table.remove(totalCount, #totalCount)
+
+		if object.eventUUID and remoteEventCallbacks[object.eventUUID] then
+			remoteEventCallbacks[object.eventUUID] = nil
+		end
+	end
+end
 
 function RemoteEvents.HookRemoteEvent(self: RemoteEvents, event: RemoteEvent)
 	if RemoteEvents[event] then
@@ -45,31 +76,70 @@ function RemoteEvents.QueryRemoteEvents(self: RemoteEvents)
 	end
 end
 
-function RemoteEvents.OnServerEventReceived(_: RemoteEvents, event: ServerEventObject)
+function RemoteEvents.OnServerEventReceived(self: RemoteEvents, event: ServerEventObject)
 	local arguments = decodeFromJSON(event.arguments, event.instances)
-	
-	Interface:AddRemoteEventInvoke({
-		arguments = arguments,
-		event = event.event,
-		context = "Server",
-		callbackFunction = function()
-			if event.event:IsA("RemoteEvent") or event.event:IsA("UnreliableRemoteEvent") then
-				local eventObject = event.event
+	local eventUuid = HttpService:GenerateGUID(false)
+	local ancestorTree = {}
 
-				eventObject:FireServer(table.unpack(arguments))
-			else
-				warn(`Unknown event type: '{event.event}'`)
-			end
-		end
+	local parent = event.event.Parent
+
+	while parent ~= game do
+		table.insert(ancestorTree, {
+			name = parent.Name,
+			class = parent.ClassName
+		})
+
+		parent = parent.Parent
+	end
+
+	remoteEventCallbacks[eventUuid] = function()
+		local object = event.event
+		
+		object:FireServer(table.unpack(arguments))
+	end
+
+	table.insert(remoteEventArray, {
+		eventType = event.event.ClassName,
+		eventUUID = eventUuid,
+		eventName = event.event.Name,
+		eventData = event.arguments,
+		eventSize = `{string.len(event.arguments) / 1000}kb`,
+		ancestors = ancestorTree,
+		context = "Server",
 	})
+
+	self:ReserveMemory()
+	self:UpdateInterface()
 end
 
-function RemoteEvents.OnClientEventReceived(_: RemoteEvents, event: ClientEventObject)
-	Interface:AddRemoteEventInvoke({
-		event = event.event,
-		arguments = event.arguments,
-		context = "Client",
+function RemoteEvents.OnClientEventReceived(self: RemoteEvents, event: ClientEventObject)
+	local ancestorTree = {}
+
+	local parent = event.event.Parent
+
+	while parent ~= game do
+		table.insert(ancestorTree, {
+			name = parent.Name,
+			class = parent.ClassName
+		})
+
+		parent = parent.Parent
+	end
+
+	local encodedEventData = HttpService:JSONEncode(event.arguments)
+
+	table.insert(remoteEventArray, {
+		eventType = event.event.ClassName,
+		eventUUID = HttpService:GenerateGUID(),
+		eventName = event.event.Name,
+		eventData = encodedEventData,
+		eventSize = `{string.len(encodedEventData) / 1000}kb`,
+		ancestors = ancestorTree,
+		context = "Server",
 	})
+
+	self:ReserveMemory()
+	self:UpdateInterface()
 end
 
 function RemoteEvents.OnStart(self: RemoteEvents)
@@ -77,6 +147,14 @@ function RemoteEvents.OnStart(self: RemoteEvents)
 
 	ReplicatedStorage.DescendantAdded:Connect(function()
 		self:QueryRemoteEvents()
+	end)
+
+	Interface.RepeatRemoteEventCallRequested:Connect(function(remoteUuid)
+		if remoteEventCallbacks[remoteUuid] then
+			remoteEventCallbacks[remoteUuid]()
+		else
+			warn(`Unable to find remote UUID for: '{remoteUuid}'`)
+		end
 	end)
 
 	Network.ServerRemotesFired.On(function(object)
