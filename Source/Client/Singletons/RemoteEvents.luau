@@ -1,5 +1,5 @@
 --[[
-	
+	RemoteEvents handles the logic for the RemoteEvents tab on the Interface
 ]]
 
 local HttpService = game:GetService("HttpService")
@@ -21,6 +21,9 @@ local remoteEventCallbacks = {}
 
 local RemoteEvents = {}
 
+--[[
+	Responsible for updating the interface, has a delay of 0.05 to reduce large changes having an impact on performance.
+]]
 function RemoteEvents.UpdateInterface(_: RemoteEvents, noDelay: boolean?)
 	if updateInterfaceThread then
 		task.cancel(updateInterfaceThread)
@@ -33,6 +36,9 @@ function RemoteEvents.UpdateInterface(_: RemoteEvents, noDelay: boolean?)
 	end)
 end
 
+--[[
+	Responsible for removing any excess events in the case we hit the maximum events we can log.
+]]
 function RemoteEvents.ReserveMemory(_: RemoteEvents)
 	local totalCount = #remoteEventArray
 
@@ -45,6 +51,9 @@ function RemoteEvents.ReserveMemory(_: RemoteEvents)
 	end
 end
 
+--[[
+	Hooks the remote event on the client, so this listens to when the client receives information from the server.
+]]
 function RemoteEvents.HookRemoteEvent(self: RemoteEvents, event: RemoteEvent)
 	if RemoteEvents[event] then
 		return
@@ -64,6 +73,9 @@ function RemoteEvents.HookRemoteEvent(self: RemoteEvents, event: RemoteEvent)
 	end)
 end
 
+--[[
+	Queries, and then hooks any remote events found in the scope of where we search for remote events.
+]]
 function RemoteEvents.QueryRemoteEvents(self: RemoteEvents)
 	for _, object in ReplicatedStorage:GetDescendants() do
 		if object:IsA("RemoteEvent") or object:IsA("UnreliableRemoteEvent") then
@@ -76,6 +88,18 @@ function RemoteEvents.QueryRemoteEvents(self: RemoteEvents)
 	end
 end
 
+--[[
+	Remote event received from the server, so this is actually the client invoking the server, then the server sends us
+	that request back so we can display it here.
+
+	We can't hook
+
+	Client -> Server 
+
+	But what we can do is just relay that back:
+
+	Client -> Server -> Client
+]]
 function RemoteEvents.OnServerEventReceived(self: RemoteEvents, event: ServerEventObject)
 	local arguments = decodeFromJSON(event.arguments, event.instances)
 	local eventUuid = HttpService:GenerateGUID(false)
@@ -112,6 +136,9 @@ function RemoteEvents.OnServerEventReceived(self: RemoteEvents, event: ServerEve
 	self:UpdateInterface()
 end
 
+--[[
+	This is invoked when the client receives data from an hooked remote event.
+]]
 function RemoteEvents.OnClientEventReceived(self: RemoteEvents, event: ClientEventObject)
 	local ancestorTree = {}
 

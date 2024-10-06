@@ -251,7 +251,7 @@ function Interface.SetSelectedInstance(_: Interface, instance: Instance)
 end
 
 --[[
-	
+	Will return the runtime selected in the Sandbox.
 ]]
 function Interface.GetSelectedRuntime(_: Interface): string
 	return Fusion.peek(runtimeValue)
@@ -271,10 +271,16 @@ function Interface.SetLiveEvents(_: Interface, events: { [any]: any })
 	eventsArray:set(events)
 end
 
+--[[
+	Will allow code from outside of the interface to set what interface is currently active.
+]]
 function Interface.SetSelectedPage(_: Interface, pageName: string)
 	selectedPage:set(require(Package.Client.Interface.Fusion.Pages[pageName]))
 end
 
+--[[
+	Will set the array of intercepted remotes.
+]]
 function Interface.SetInterceptedRemotes(_: Interface, events: { [any]: any })
 	interceptedRemotesArray:set(events)
 end

@@ -1,5 +1,5 @@
 --[[
-	
+	Logging handles the logic for the Logging tab on the Interface
 ]]
 
 local LogService = game:GetService("LogService")
@@ -24,6 +24,16 @@ local updateInterfaceThread
 
 local Logging = {}
 
+--[[
+	Creates a breakpoint in the console, useful for figuring out when something begins/ends.
+]]
+function Logging.Breakpoint(_: Logging)
+	warn(`--[[ {string.rep(`-`, 65)} ]]--`)
+end
+
+--[[
+	Responsible for updating the interface, has a delay of 0.05 to reduce large changes having an impact on performance.
+]]
 function Logging.UpdateInterface(_: Logging, noDelay: boolean?)
 	if updateInterfaceThread then
 		task.cancel(updateInterfaceThread)
@@ -36,6 +46,9 @@ function Logging.UpdateInterface(_: Logging, noDelay: boolean?)
 	end)
 end
 
+--[[
+	Responsible for removing any excess events in the case we hit the maximum events we can log.
+]]
 function Logging.ReserveMemory(_: Logging)
 	local totalCount = #serverLogs + #clientLogs
 
@@ -52,10 +65,14 @@ function Logging.ReserveMemory(_: Logging)
 	end
 end
 
-function Logging.Breakpoint(_: Logging)
-	warn(`--[[ {string.rep(`-`, 65)} ]]--`)
-end
+--[[
+	Invoked when the server logs are given to the player, will occur every second if there's server logs to be
+	handed over.
 
+	This method requires a time as we're offsetting when the genuine log occurs on the server so that we can
+	bunch together a list of logs, for performance reasons - we don't want to spam the client with server
+	logs.
+]]
 function Logging.OnServerLogReceived(self: Logging, message: string, type: string, time: number)
 	local messageType = Enum.MessageType
 
@@ -77,6 +94,9 @@ function Logging.OnServerLogReceived(self: Logging, message: string, type: strin
 	self:UpdateInterface()
 end
 
+--[[
+	Called when the client logs are created.
+]]
 function Logging.OnClientLogReceived(self: Logging, message: string, type: Enum.MessageType)
 	local logTime = DateTime.now().UnixTimestampMillis
 
@@ -134,6 +154,13 @@ function Logging.OnStart(self: Logging)
 		self:Breakpoint()
 	end)
 
+	--[[
+		Routinely send client logs to the server, we want the server to know all client logs so that if we want to
+		export our logs, we can do so without sending the server the entire log history of both the server and 
+		client.
+
+		That would be a bad idea, so instead we just incremental update the server.
+	]]
 	while true do
 		task.wait(1)
 

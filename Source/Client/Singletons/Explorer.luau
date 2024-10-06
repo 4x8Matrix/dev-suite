@@ -1,5 +1,5 @@
 --[[
-	
+	Explorer handles the logic for the Explorer tab on the Interface
 ]]
 
 local UserInputService = game:GetService("UserInputService")
@@ -20,6 +20,7 @@ function Explorer.OnStart(_: Explorer)
 	highlightInstance.FillColor = Theme.AccentColor3
 	highlightInstance:AddTag(`_DEBUG_IGNORE`)
 
+	-- click to select logic
 	UserInputService.InputBegan:Connect(function(inputObject: InputObject, gameProcessed: boolean)
 		if gameProcessed then
 			return
@@ -30,6 +31,7 @@ function Explorer.OnStart(_: Explorer)
 		end
 		
 		if inputObject.UserInputType == Enum.UserInputType.MouseButton1 or inputObject.UserInputType == Enum.UserInputType.Touch then
+			-- translating the position of our 2d mouse into a 3d object(?)
 			local mouse = game.UserInputService:GetMouseLocation()
 			local ray = workspace.Camera:ViewportPointToRay(mouse.X, mouse.Y)
 			local result = workspace:Raycast(ray.Origin, ray.Direction * 9999999999)
