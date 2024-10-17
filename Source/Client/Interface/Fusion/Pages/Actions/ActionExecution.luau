@@ -1,16 +1,13 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
 local Package = script.Parent.Parent.Parent.Parent.Parent.Parent
 
-local TextBox = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.TextBox)
-local UICorner = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.UICorner)
-local UIPadding = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.UIPadding)
-local Sift = require(Package.Parent.Sift)
 local Fusion = require(Package.Parent.Fusion)
 
+local TextBox = require(Package.Client.Interface.Components.TextBox)
+local UICorner = require(Package.Client.Interface.Components.UICorner)
+local UIPadding = require(Package.Client.Interface.Components.UIPadding)
 local Button = require(Package.Client.Interface.Components.Button)
-local ImageButton = require(Package.Client.Interface.Components.ImageButton)
 local ImageLabel = require(Package.Client.Interface.Components.ImageLabel)
 local TextLabel = require(Package.Client.Interface.Components.TextLabel)
 
