@@ -38,6 +38,29 @@ return function(scope: FusionTypes.Scope, props: {
 		runtime: FusionTypes.Value<string>,
 		availableRuntimes: FusionTypes.Value<{ string }>,
 	},
+	
+	actions: {
+		closedFolders: FusionTypes.Value<{ string }>,
+
+		actions: {
+			{
+				path: { string },
+				name: string,
+				description: string,
+
+				uuid: string,
+				context: "Server" | "Client",
+
+				arguments: {
+					{
+						type: string,
+						name: string,
+						default: string,
+					}
+				}
+			}
+		}
+	},
 
 	liveEvents: {
 		events: FusionTypes.Value<{
@@ -86,6 +109,10 @@ return function(scope: FusionTypes.Scope, props: {
 	},
 
 	signals: {
+		actions: {
+			executeAction: SignalTypes.Signal<string>
+		},
+
 		sandbox: {
 			evalServerCode: SignalTypes.Signal<string>,
 			evalClientCode: SignalTypes.Signal<string>,
@@ -191,6 +218,7 @@ return function(scope: FusionTypes.Scope, props: {
 								interceptor = props.interceptor,
 								logging = props.logging,
 								liveEvents = props.liveEvents,
+								actions = props.actions,
 
 								minimiseWindowRequested = function()
 									goalPosition:set(0)

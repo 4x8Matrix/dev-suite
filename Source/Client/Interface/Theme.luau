@@ -61,6 +61,7 @@ return {
 	LoggingIcon = `http://www.roblox.com/asset/?id=71965170319925`,
 	StatisticsIcon = `http://www.roblox.com/asset/?id=105773589734060`,
 	PerformanceIcon = `http://www.roblox.com/asset/?id=126479063941214`,
+	ActionsIcon = `http://www.roblox.com/asset/?id=139017748369084`,
 
 	TabIcon = `http://www.roblox.com/asset/?id=135396811830334`,
 	QuestionIcon = `http://www.roblox.com/asset/?id=82261841272265`,
@@ -76,5 +77,8 @@ return {
 	PointerIcon = `http://www.roblox.com/asset/?id=73809779520162`,
 	SelectionIcon = `http://www.roblox.com/asset/?id=74544478147788`,
 
-	PropertiesIcon = `http://www.roblox.com/asset/?id=121668548193381`
+	PropertiesIcon = `http://www.roblox.com/asset/?id=121668548193381`,
+
+	FolderIcon = `http://www.roblox.com/asset/?id=81984538720069`,
+	OpenFolderIcon = `http://www.roblox.com/asset/?id=77505221896372`,
 }

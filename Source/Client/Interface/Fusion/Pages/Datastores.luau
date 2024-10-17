@@ -10,7 +10,7 @@ local Fusion = require(Package.Parent.Fusion)
 local Datastores = {}
 
 Datastores.DisplayName = `Datastores`
-Datastores.DisplayOrder = 8
+Datastores.DisplayOrder = 11
 Datastores.DisplayIcon = Theme.DatastoresIcon
 Datastores.Enabled = false
 

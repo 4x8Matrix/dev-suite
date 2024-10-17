@@ -65,6 +65,44 @@ return function(parent)
 			})
 		},
 
+		actions = {
+			closedFolders = scope:Value({}),
+
+			actions = scope:Value({
+				{
+					path = { "Example", "Currency" },
+					name = "Set Currency",
+					description = "Set the Currency of a player.",
+
+					uuid = "",
+					context = "Server",
+
+					arguments = {
+						{
+							type = "Number",
+							name = "Currency",
+							default = 10000
+						},
+						{
+							type = "Number",
+							name = "Multiplier",
+							default = 2
+						}
+					}
+				},
+				{
+					path = { "Example" },
+					name = "Explode All Players",
+					description = "Set the Currency of a player.",
+
+					uuid = "",
+					context = "Client",
+
+					arguments = { }
+				}
+			})
+		},
+
 		sandbox = {
 			runtime = scope:Value("Roblox"),
 			availableRuntimes = scope:Value({
@@ -80,6 +118,10 @@ return function(parent)
 
 		signals = {
 			minimiseWindow = Signal.new(),
+
+			actions = {
+				executeAction = Signal.new()
+			},
 
 			logging = {
 				exportLogs = Signal.new(),
