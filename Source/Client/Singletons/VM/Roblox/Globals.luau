@@ -4,6 +4,7 @@ local LuauCeption = require(Package.Vendor.LuauCeption)
 
 local VMBindings = require(Package.Client.Singletons.VM.Bindings)
 local VMTypes = require(Package.Client.Singletons.VM.Types)
+local VMConstants = require(Package.Client.Singletons.VM.Constants)
 local VMMacros = require(Package.Client.Singletons.VM.Macros)
 
 local cFunctions = LuauCeption.wasm.cfns
@@ -105,6 +106,16 @@ local function warnImpl(luaState: VMTypes.LuaState)
 	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("warn"))
 end
 
+local function _GImpl(luaState: VMTypes.LuaState)
+	cFunctions.lua_getfield(luaState, VMConstants.LUA_REGISTRYINDEX, VMBindings:LoadCString("global"))
+	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("_G"))
+end
+
+local function sharedImpl(luaState: VMTypes.LuaState)
+	cFunctions.lua_getfield(luaState, VMConstants.LUA_REGISTRYINDEX, VMBindings:LoadCString("global"))
+	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("shared"))
+end
+
 return function(luaState: VMTypes.LuaState)
 	-- globals
 	elapsedTimeImpl(luaState)
@@ -115,6 +126,8 @@ return function(luaState: VMTypes.LuaState)
 	userSettingsImpl(luaState)
 	versionImpl(luaState)
 	warnImpl(luaState)
+	_GImpl(luaState)
+	sharedImpl(luaState)
 
 	-- instances
 	VMBindings:LoadInstance(luaState, workspace)
