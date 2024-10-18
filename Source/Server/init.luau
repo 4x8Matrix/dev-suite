@@ -18,7 +18,7 @@ function DevSuiteServer.Interface.new(): DevSuiteServer
 		__index = DevSuiteServer.Prototype
 	})
 
-	local singletons = Runtime:RequireDescendants(script.Singletons)
+	local singletons = Runtime:RequireChildren(script.Singletons)
 
 	table.sort(singletons, function(singletonA: { Priority: number? }, singletonB: { Priority: number? })
 		local priorityA = singletonA.Priority or 0

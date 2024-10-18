@@ -50,7 +50,7 @@ local selectedPage = windowScope:Value(nil)
 
 local runtimeValue = windowScope:Value("Roblox")
 local availableRuntimesValue = windowScope:Value({
-	"Roblox", "Luau", "Swift"
+	"Roblox", "Luau", "Exploit"
 })
 
 local selectedInstanceValue = windowScope:Value(nil)
@@ -255,6 +255,13 @@ end
 ]]
 function Interface.GetSelectedRuntime(_: Interface): string
 	return Fusion.peek(runtimeValue)
+end
+
+--[[
+	Will return all runtimes available to the user.
+]]
+function Interface.GetAllRuntimes(_: Interface): { string }
+	return Fusion.peek(availableRuntimesValue)
 end
 
 --[[
