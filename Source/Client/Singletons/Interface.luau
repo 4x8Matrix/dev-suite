@@ -48,11 +48,6 @@ local eventsArray = windowScope:Value({})
 
 local selectedPage = windowScope:Value(nil)
 
-local runtimeValue = windowScope:Value("Roblox")
-local availableRuntimesValue = windowScope:Value({
-	"Roblox", "Luau", "Exploit"
-})
-
 local selectedInstanceValue = windowScope:Value(nil)
 
 local Interface = {}
@@ -132,11 +127,6 @@ function Interface.CreateInterface(self: Interface)
 
 		interceptor = {
 			intercepted = interceptedRemotesArray,
-		},
-
-		sandbox = {
-			runtime = runtimeValue,
-			availableRuntimes = availableRuntimesValue,
 		},
 
 		signals = {
@@ -248,20 +238,6 @@ end
 ]]
 function Interface.SetSelectedInstance(_: Interface, instance: Instance)
 	selectedInstanceValue:set(instance)
-end
-
---[[
-	Will return the runtime selected in the Sandbox.
-]]
-function Interface.GetSelectedRuntime(_: Interface): string
-	return Fusion.peek(runtimeValue)
-end
-
---[[
-	Will return all runtimes available to the user.
-]]
-function Interface.GetAllRuntimes(_: Interface): { string }
-	return Fusion.peek(availableRuntimesValue)
 end
 
 --[[

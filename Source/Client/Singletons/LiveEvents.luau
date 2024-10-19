@@ -85,6 +85,7 @@ function LiveEvents.OnStart(self: LiveEvents)
 	self:AddIgnoredInstance(Players.LocalPlayer)
 
 	self:AddIgnoredProperty(`Parent`)
+	self:AddIgnoredProperty(`TopbarInset`)
 
 	Players.LocalPlayer.CharacterAdded:Connect(function()
 		self:AddIgnoredInstance(Players.LocalPlayer.Character)

@@ -1,3 +1,5 @@
+--# selene: allow(shadowing)
+
 --[[
 	Bindings provide utilities, or helpful functions for manipulating the Luau VM, from things such as reading/writing C
 	strings, to creating CFunctions that act as functions we can define in Luau.
@@ -21,6 +23,18 @@ local cFunctions = LuauCeption.wasm.cfns
 local uuidCounter = 0
 
 local Bindings = {}
+
+--[[
+	
+]]
+function Bindings.DebugStack(self: Bindings, luaState: Types.LuaState)
+	for index = 1, 10 do
+		local type = self:ReadCString(cFunctions.luaL_typename(luaState, index))
+		local value = self:ToLuau(luaState, index)
+
+		print(`{index} - {type} - {value}`)
+	end
+end
 
 --[[
 	Responsible for loading a luau string, into the wasm llvm, will return a pointer.
@@ -50,10 +64,11 @@ end
 function Bindings.LoadCFunction(self: Bindings, luaState: Types.LuaState, source: (state: Types.LuaState, currentIndex: number) -> ()): Types.CPointer
 	local pointer = #LuauCeption.wasm.indirect_function_table.data + 1
 
-	LuauCeption.wasm.indirect_function_table.data[pointer] = function(currentIndex: number)
-		local status, result = pcall(source, luaState, currentIndex)
+	LuauCeption.wasm.indirect_function_table.data[pointer] = function(...)
+		local status, result = pcall(source, ...)
 
 		if not status then
+			warn(result)
 			self:Error(luaState, self:LoadCString(result))
 
 			return 0
@@ -69,7 +84,7 @@ end
 	Pops an instance, in the Roblox engine onto the top of the Luau VMs stack
 ]]
 function Bindings.LoadInstance(self: Bindings, luaState: Types.LuaState, instance: any, deallocator: () -> ()?)
-	cFunctions.lua_newuserdatadtor(luaState, 16, self:LoadCFunction(luaState, function()
+	cFunctions.lua_newuserdatadtor(luaState, 1, self:LoadCFunction(luaState, function()
 		if deallocator then
 			deallocator()
 		end
@@ -83,7 +98,7 @@ function Bindings.LoadInstance(self: Bindings, luaState: Types.LuaState, instanc
 	cFunctions.lua_pushstring(luaState, self:LoadCString("Instance"))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__type"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		local methodNamePointer = cFunctions.lua_namecallatom(luaState, 0)
 		local methodName = self:ReadCString(methodNamePointer)
 
@@ -109,7 +124,7 @@ function Bindings.LoadInstance(self: Bindings, luaState: Types.LuaState, instanc
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__namecall"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		local indexPointer = VMMacros.lua_tostring(luaState, 2)
 		local index = self:ReadCString(indexPointer)
 
@@ -121,7 +136,7 @@ function Bindings.LoadInstance(self: Bindings, luaState: Types.LuaState, instanc
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__index"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		local indexPointer = VMMacros.lua_tostring(luaState, 2)
 		local index = self:ReadCString(indexPointer)
 
@@ -133,7 +148,7 @@ function Bindings.LoadInstance(self: Bindings, luaState: Types.LuaState, instanc
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__newindex"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		local arguments = {}
 
 		for index = 1, cFunctions.lua_gettop(luaState) do
@@ -154,105 +169,105 @@ function Bindings.LoadInstance(self: Bindings, luaState: Types.LuaState, instanc
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__call"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__concat"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__unm"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__add"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__sub"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__mul"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__div"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__idiv"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__mod"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__pow"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		cFunctions.lua_pushstring(luaState, self:LoadCString(tostring(instance)))
 
 		return 1
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__tostring"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__eq"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__lt"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__le"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
 	end))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__len"))
 
-	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function()
+	VMMacros.lua_pushcfunction(luaState, self:LoadCFunction(luaState, function(luaState)
 		self:Error(luaState, self:LoadCString(`NOT_IMPLEMENTED`))
 
 		return 0
@@ -262,7 +277,7 @@ function Bindings.LoadInstance(self: Bindings, luaState: Types.LuaState, instanc
 	cFunctions.lua_pushstring(luaState, self:LoadCString(`{uuidCounter}`))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__uuid"))
 
-	VMContext:SetValue(luaState, `userdata-{uuidCounter}`, instance)
+	VMContext:SetValue(`userdata-{uuidCounter}`, instance)
 
 	uuidCounter += 1
 
@@ -293,7 +308,7 @@ function Bindings.ToLuau<T>(self: Bindings, luaState: Types.LuaState, position: 
 		local instanceUuidPointer = VMMacros.lua_tostring(luaState, position + 2)
 		local instanceUuid = self:ReadCString(instanceUuidPointer)
 
-		return VMContext:GetValue(luaState, `userdata-{instanceUuid}`) :: any
+		return VMContext:GetValue(`userdata-{instanceUuid}`) :: any
 	elseif typeName == "table" then
 		local content = {}
 

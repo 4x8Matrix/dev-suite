@@ -12,9 +12,7 @@ local Sandbox = {}
 
 function Sandbox.OnStart(_: Sandbox)
 	Interface.EvalClientCodeRequested:Connect(function(source: string)
-		local selectedRuntime = Interface:GetSelectedRuntime() :: any
-
-		VM:Eval(source, selectedRuntime)
+		VM:Eval(source)
 	end)
 end
 

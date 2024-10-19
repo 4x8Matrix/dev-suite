@@ -1,3 +1,5 @@
+--# selene: allow(shadowing)
+
 local Package = script.Parent.Parent.Parent.Parent.Parent
 
 local LuauCeption = require(Package.Vendor.LuauCeption)
@@ -9,125 +11,105 @@ local VMMacros = require(Package.Client.Singletons.VM.Macros)
 
 local cFunctions = LuauCeption.wasm.cfns
 
-local function elapsedTimeImpl(luaState: VMTypes.LuaState)
-	VMMacros.lua_pushcfunction(luaState, VMBindings:LoadCFunction(luaState, function()
-		cFunctions.lua_pushinteger(luaState, elapsedTime())
-		
-		return 1
-	end), VMBindings:LoadCString("elapsedTime"))
+local function delayImpl(_luaState: VMTypes.LuaState)
+	return 0
+end
 
-	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("elapsedTime"))
+local function waitImpl(_luaState: VMTypes.LuaState)
+	return 0
+end
+
+local function elapsedTimeImpl(luaState: VMTypes.LuaState)
+	cFunctions.lua_pushnumber(luaState, elapsedTime())
+
+	return 1
 end
 
 local function pluginManagerImpl(luaState: VMTypes.LuaState)
-	VMMacros.lua_pushcfunction(luaState, VMBindings:LoadCFunction(luaState, function()
-		VMBindings:Error(luaState, VMBindings:LoadCString(`The current thread cannot call 'PluginManager' (lacking capability Plugin)`))
+	VMBindings:Error(luaState, VMBindings:LoadCString(`The current thread cannot call 'PluginManager' (lacking capability Plugin)`))
 		
-		return 0
-	end), VMBindings:LoadCString("PluginManager"))
-
-	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("PluginManager"))
+	return 0
 end
 
 local function settingsImpl(luaState: VMTypes.LuaState)
-	VMMacros.lua_pushcfunction(luaState, VMBindings:LoadCFunction(luaState, function()
-		VMBindings:Error(luaState, VMBindings:LoadCString(`The current thread cannot call 'settings' (lacking capability Plugin)`))
+	VMBindings:Error(luaState, VMBindings:LoadCString(`The current thread cannot call 'settings' (lacking capability Plugin)`))
 		
-		return 0
-	end), VMBindings:LoadCString("settings"))
-
-	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("settings"))
+	return 0
 end
 
 local function tickImpl(luaState: VMTypes.LuaState)
-	VMMacros.lua_pushcfunction(luaState, VMBindings:LoadCFunction(luaState, function()
-		cFunctions.lua_pushinteger(luaState, tick())
+	cFunctions.lua_pushnumber(luaState, tick())
 		
-		return 1
-	end), VMBindings:LoadCString("tick"))
-
-	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("tick"))
+	return 1
 end
 
 local function timeImpl(luaState: VMTypes.LuaState)
-	VMMacros.lua_pushcfunction(luaState, VMBindings:LoadCFunction(luaState, function()
-		cFunctions.lua_pushinteger(luaState, time())
+	cFunctions.lua_pushnumber(luaState, time())
 		
-		return 1
-	end), VMBindings:LoadCString("time"))
-
-	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("time"))
+	return 1
 end
 
 local function userSettingsImpl(luaState: VMTypes.LuaState)
-	VMMacros.lua_pushcfunction(luaState, VMBindings:LoadCFunction(luaState, function()
-		VMBindings:FromLuau(luaState, UserSettings())
+	VMBindings:FromLuau(luaState, UserSettings())
 		
-		return 1
-	end), VMBindings:LoadCString("UserSettings"))
-
-	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("UserSettings"))
+	return 1
 end
 
 local function versionImpl(luaState: VMTypes.LuaState)
 	-- selene: allow(undefined_variable)
 	local versionPointer = VMBindings:LoadCString(version())
 
-	VMMacros.lua_pushcfunction(luaState, VMBindings:LoadCFunction(luaState, function()
-		cFunctions.lua_pushstring(luaState, versionPointer)
+	cFunctions.lua_pushstring(luaState, versionPointer)
 		
-		return 1
-	end), VMBindings:LoadCString("version"))
-
-	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("version"))
+	return 1
 end
 
 local function warnImpl(luaState: VMTypes.LuaState)
-	VMMacros.lua_pushcfunction(luaState, VMBindings:LoadCFunction(luaState, function()
-		local numberOfArguments = cFunctions.lua_gettop(luaState)
-		local source = ""
+	local numberOfArguments = cFunctions.lua_gettop(luaState)
+	local source = ""
 
-		for index = 1, numberOfArguments do
-			local stringPointer = cFunctions.luaL_tolstring(luaState, index, 0)
+	for index = 1, numberOfArguments do
+		local stringPointer = cFunctions.luaL_tolstring(luaState, index, 0)
 
-			if index > 1 then
-				source ..= `\t`
-			end
-
-			source ..= VMBindings:ReadCString(stringPointer)
-			VMMacros.lua_pop(luaState, 1)
+		if index > 1 then
+			source ..= `\t`
 		end
 
-		warn(source)
+		source ..= VMBindings:ReadCString(stringPointer)
+		VMMacros.lua_pop(luaState, 1)
+	end
 
-		return 0
-	end), VMBindings:LoadCString("warn"))
+	warn(source)
 
-	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("warn"))
+	return 0
 end
 
-local function _GImpl(luaState: VMTypes.LuaState)
-	cFunctions.lua_getfield(luaState, VMConstants.LUA_REGISTRYINDEX, VMBindings:LoadCString("global"))
-	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("_G"))
-end
-
-local function sharedImpl(luaState: VMTypes.LuaState)
-	cFunctions.lua_getfield(luaState, VMConstants.LUA_REGISTRYINDEX, VMBindings:LoadCString("global"))
-	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("shared"))
-end
+local globals = table.freeze({
+	delay = delayImpl,
+	wait = waitImpl,
+	ElapsedTime = elapsedTimeImpl,
+	elapsedTime = elapsedTimeImpl,
+	PluginManager = pluginManagerImpl,
+	settings = settingsImpl,
+	UserSettings = userSettingsImpl,
+ 	version = versionImpl,
+ 	warn = warnImpl,
+ 	tick = tickImpl,
+ 	time = timeImpl,
+})
 
 return function(luaState: VMTypes.LuaState)
-	-- globals
-	elapsedTimeImpl(luaState)
-	pluginManagerImpl(luaState)
-	settingsImpl(luaState)
-	tickImpl(luaState)
-	timeImpl(luaState)
-	userSettingsImpl(luaState)
-	versionImpl(luaState)
-	warnImpl(luaState)
-	_GImpl(luaState)
-	sharedImpl(luaState)
+	for globalName, global in globals do
+		VMMacros.lua_pushcfunction(luaState, VMBindings:LoadCFunction(luaState, global), VMBindings:LoadCString(globalName))
+		VMMacros.lua_setglobal(luaState, VMBindings:LoadCString(globalName))
+	end
+
+	-- weird globals
+	cFunctions.lua_getfield(luaState, VMConstants.LUA_REGISTRYINDEX, VMBindings:LoadCString("global"))
+	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("_G"))
+	
+	cFunctions.lua_getfield(luaState, VMConstants.LUA_REGISTRYINDEX, VMBindings:LoadCString("global"))
+	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("shared"))
 
 	-- instances
 	VMBindings:LoadInstance(luaState, workspace)
