@@ -28,7 +28,11 @@ local Bindings = {}
 	
 ]]
 function Bindings.DebugStack(self: Bindings, luaState: Types.LuaState)
-	for index = 1, 10 do
+	local stackSize = cFunctions.lua_gettop(luaState)
+
+	print(`STACK SIZE: {stackSize}\n{string.rep("-", 50)}`)
+
+	for index = 1, stackSize do
 		local type = self:ReadCString(cFunctions.luaL_typename(luaState, index))
 		local value = self:ToLuau(luaState, index)
 

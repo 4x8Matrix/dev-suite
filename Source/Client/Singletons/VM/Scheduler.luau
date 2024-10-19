@@ -16,22 +16,23 @@ local VMMacros = require(Package.Client.Singletons.VM.Macros)
 local cFunctions = LuauCeption.wasm.cfns
 
 local threadQueue: { ThreadInfo } = {}
+local threadFlags: { [VMTypes.LuaThread]: { [string]: boolean } } = {}
 local awaitingStatus: { HookInfo } = {}
 
-local errorHandler: (luaState: VMTypes.LuaState, thread: VMTypes.LuaThread, message: string) -> ()
+local errorHandler: (thread: VMTypes.LuaThread, from: VMTypes.LuaState?, message: string) -> ()
 
 local Scheduler = {}
 
-function Scheduler.SetErrorHandler(_: Scheduler, handler: (luaState: VMTypes.LuaState, thread: VMTypes.LuaThread, message: string) -> ())
+function Scheduler.SetErrorHandler(_: Scheduler, handler: (thread: VMTypes.LuaThread, from: VMTypes.LuaState?, message: string) -> ())
 	errorHandler = handler
 end
 
-function Scheduler.FromFunction(_: Scheduler, luaState: VMTypes.LuaState, ...)
+function Scheduler.FromFunction(_: Scheduler, luaState: VMTypes.LuaState, position: number?, ...)
 	local thread = cFunctions.lua_newthread(luaState)
 
 	VMMacros.lua_pop(luaState, 1)
 
-	cFunctions.lua_xmove(luaState, thread, 1)
+	cFunctions.lua_xmove(luaState, thread, position)
 	
 	VMMacros.lua_pop(luaState, 1)
 
@@ -43,24 +44,44 @@ function Scheduler.FromFunction(_: Scheduler, luaState: VMTypes.LuaState, ...)
 	return thread
 end
 
-function Scheduler.ResumeThread(_: Scheduler, luaState: VMTypes.LuaState, thread: VMTypes.LuaThread, args: PackedArguments)
-	local argSize = table.maxn(args)
+function Scheduler.ResumeThread(_: Scheduler, thread: VMTypes.LuaThread, from: VMTypes.LuaState?, args: PackedArguments?)
+	local argSize = args and table.maxn(args)
 	
-	for index = 1, argSize do
-		VMBindings:FromLuau(luaState, args[index])
+	if args and argSize then
+		for index = 1, argSize do
+			VMBindings:FromLuau(thread, args[index])
+		end
 	end
-	
-	local resumeState = cFunctions.lua_resume(thread, luaState, table.maxn(args))
 
-	if resumeState ~= VMConstants.lua_CoStatus.LUA_CORUN then
+	local resumeState = cFunctions.lua_resume(thread, from or 0, argSize or 0)
+
+	if resumeState == VMConstants.lua_CoStatus.LUA_COERR then
 		local stringPointer = cFunctions.luaL_tolstring(thread, 1, 0)
 		local errorMessage = VMBindings:ReadCString(stringPointer)
 
 		if errorHandler then
-			errorHandler(luaState, thread, errorMessage)
+			errorHandler(thread, from, errorMessage)
 		else
 			error(errorMessage)
 		end
+	end
+
+	return resumeState
+end
+
+function Scheduler.YieldThread(_: Scheduler, thread: VMTypes.LuaThread, numberOfResults: number?)
+	cFunctions.lua_yield(thread, numberOfResults or 0)
+end
+
+function Scheduler.SetThreadFlag(_: Scheduler, thread: VMTypes.LuaThread, flag: string, enabled: boolean?)
+	if not threadFlags[thread] then
+		threadFlags[thread] = {}
+	end
+
+	if enabled then
+		threadFlags[thread][flag] = true
+	else
+		threadFlags[thread][flag] = nil
 	end
 end
 
@@ -72,12 +93,16 @@ function Scheduler.Cycle(self: Scheduler, luaState: VMTypes.LuaState)
 		local thread = threadInformation.thread
 		local args = threadInformation.args
 
+		if threadFlags[thread] and threadFlags[thread].IGNORED then
+			continue
+		end
+
 		local threadStatus = cFunctions.lua_costatus(luaState, thread)
 
 		threadStatuses[thread] = threadStatus
 
 		if threadStatus == VMConstants.lua_CoStatus.LUA_COSUS then
-			self:ResumeThread(luaState, thread, args)
+			self:ResumeThread(thread, luaState, args)
 		end
 	end
 
@@ -85,6 +110,10 @@ function Scheduler.Cycle(self: Scheduler, luaState: VMTypes.LuaState)
 		local waitingThread = hookInformation.thread
 		local targetThread = hookInformation.targetThread
 		local statuses = hookInformation.statuses
+
+		if not threadStatuses[targetThread] then
+			continue
+		end
 
 		if table.find(statuses, threadStatuses[targetThread]) then
 			table.remove(awaitingStatus, index - awaitingThreadsRemoved)

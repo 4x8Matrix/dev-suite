@@ -8,15 +8,46 @@ local VMBindings = require(Package.Client.Singletons.VM.Bindings)
 local VMTypes = require(Package.Client.Singletons.VM.Types)
 local VMConstants = require(Package.Client.Singletons.VM.Constants)
 local VMMacros = require(Package.Client.Singletons.VM.Macros)
+local VMScheduler = require(Package.Client.Singletons.VM.Scheduler)
 
 local cFunctions = LuauCeption.wasm.cfns
 
-local function delayImpl(_luaState: VMTypes.LuaState)
+local function delayImpl(luaState: VMTypes.LuaState)
+	local timeToWait = cFunctions.luaL_checknumber(luaState, 1)
+	local thread = VMScheduler:FromFunction(luaState, 2)
+
+	VMScheduler:SetThreadFlag(thread, "IGNORED", true)
+
+	task.delay(timeToWait, function()
+		VMScheduler:SetThreadFlag(thread, "IGNORED", nil)
+		
+		VMScheduler:ResumeThread(thread, luaState)
+	end)
+
+	VMMacros.lua_pop(luaState, 1)
+
 	return 0
 end
 
-local function waitImpl(_luaState: VMTypes.LuaState)
+local function spawnImpl(luaState: VMTypes.LuaState)
+	VMScheduler:FromFunction(luaState, 1, 0, elapsedTime())
+
 	return 0
+end
+
+local function waitImpl(luaState: VMTypes.LuaState)
+	local timeToWait = cFunctions.luaL_checknumber(luaState, 1)
+	local clockStart = os.clock()
+
+	VMScheduler:SetThreadFlag(luaState, "IGNORED", true)
+
+	task.delay(timeToWait, function()
+		VMScheduler:SetThreadFlag(luaState, "IGNORED", nil)
+		
+		VMScheduler:ResumeThread(luaState, 0, table.pack(os.clock() - clockStart))
+	end)
+
+	return VMScheduler:YieldThread(luaState, 1)
 end
 
 local function elapsedTimeImpl(luaState: VMTypes.LuaState)
@@ -27,6 +58,18 @@ end
 
 local function pluginManagerImpl(luaState: VMTypes.LuaState)
 	VMBindings:Error(luaState, VMBindings:LoadCString(`The current thread cannot call 'PluginManager' (lacking capability Plugin)`))
+		
+	return 0
+end
+
+local function debuggerManagerImpl(luaState: VMTypes.LuaState)
+	VMBindings:Error(luaState, VMBindings:LoadCString(`The current thread cannot call 'settings' (lacking capability Plugin)`))
+		
+	return 0
+end
+
+local function printidentityImpl(_: VMTypes.LuaState)
+	print("Current identity is 2")
 		
 	return 0
 end
@@ -55,11 +98,23 @@ local function userSettingsImpl(luaState: VMTypes.LuaState)
 	return 1
 end
 
+local function statsImpl(luaState: VMTypes.LuaState)
+	VMBindings:FromLuau(luaState, game:GetService("Stats"))
+		
+	return 1
+end
+
 local function versionImpl(luaState: VMTypes.LuaState)
 	-- selene: allow(undefined_variable)
 	local versionPointer = VMBindings:LoadCString(version())
 
 	cFunctions.lua_pushstring(luaState, versionPointer)
+		
+	return 1
+end
+
+local function typeofImpl(luaState: VMTypes.LuaState)
+	cFunctions.lua_pushstring(luaState, cFunctions.luaL_typename(luaState, 1))
 		
 	return 1
 end
@@ -87,15 +142,20 @@ end
 local globals = table.freeze({
 	delay = delayImpl,
 	wait = waitImpl,
-	ElapsedTime = elapsedTimeImpl,
 	elapsedTime = elapsedTimeImpl,
+	ElapsedTime = elapsedTimeImpl,
 	PluginManager = pluginManagerImpl,
+	DebuggerManager = debuggerManagerImpl,
 	settings = settingsImpl,
 	UserSettings = userSettingsImpl,
  	version = versionImpl,
  	warn = warnImpl,
  	tick = tickImpl,
  	time = timeImpl,
+	spawn = spawnImpl,
+	printidentity = printidentityImpl,
+	stats = statsImpl,
+	typeof = typeofImpl,
 })
 
 return function(luaState: VMTypes.LuaState)
@@ -105,6 +165,9 @@ return function(luaState: VMTypes.LuaState)
 	end
 
 	-- weird globals
+	VMMacros.lua_getglobal(luaState, VMBindings:LoadCString("pcall"))
+	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("ypcall"))
+
 	cFunctions.lua_getfield(luaState, VMConstants.LUA_REGISTRYINDEX, VMBindings:LoadCString("global"))
 	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("_G"))
 	

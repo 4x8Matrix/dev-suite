@@ -80,7 +80,7 @@ local function createScrollingFrame(scope: FusionTypes.Scope, props: {
 		[Fusion.Children] = {
 			LineCountFrame = scope:New("Frame")({
 				Size = UDim2.new(0, 40, 1, 0),
-				Position = UDim2.fromOffset(0, -20),
+				Position = UDim2.fromOffset(0, 0),
 
 				BackgroundColor3 = lineCountFrameColor3,
 				AutomaticSize = Enum.AutomaticSize.Y,
@@ -98,9 +98,10 @@ local function createScrollingFrame(scope: FusionTypes.Scope, props: {
 
 					LineCount = TextLabel(scope, {
 						Size = UDim2.fromScale(0.7, 999),
-						Position = UDim2.fromOffset(0, 25),
+						Position = UDim2.fromOffset(0, 3.5),
 						AnchorPoint = Vector2.new(0, 0),
 						TextSize = 17,
+						FontFace = Theme.CodeblockFont,
 						TextScaled = false,
 						Text = scope:Computed(function(use)
 							local lineCountText = ""
@@ -116,6 +117,7 @@ local function createScrollingFrame(scope: FusionTypes.Scope, props: {
 						TextXAlignment = Enum.TextXAlignment.Center,
 						TextYAlignment = Enum.TextYAlignment.Top,
 						AutomaticSize = Enum.AutomaticSize.Y,
+						
 
 						[Fusion.Children] = {
 							UIPadding = scope:New("UIPadding")({

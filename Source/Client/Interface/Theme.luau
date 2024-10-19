@@ -4,7 +4,7 @@ return {
 	BaseSidebarColor3 = Color3.fromRGB(22, 22, 22),
 
 	CodeblockBackgroundColor3 = Color3.fromRGB(25, 25, 25),
-	CodeblockFont = Font.fromName(Enum.Font.Gotham.Name),
+	CodeblockFont = Font.fromName(Enum.Font.RobotoMono.Name, Enum.FontWeight.Regular),
 	CodeblockColor3 = Color3.fromRGB(255, 255, 255),
 
 	UIStrokeThickness = 2,

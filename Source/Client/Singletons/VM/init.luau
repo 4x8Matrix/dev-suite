@@ -48,7 +48,7 @@ end
 	
 ]]
 function VM.Run(self: VM)
-	local thread = VMScheduler:FromFunction(self.LuaState)
+	local thread = VMScheduler:FromFunction(self.LuaState, 1)
 	local state = VMScheduler:Await(thread, VMConstants.lua_CoStatus.LUA_COERR, VMConstants.lua_CoStatus.LUA_COFIN)
 
 	return state == VMConstants.lua_CoStatus.LUA_COFIN
