@@ -27,12 +27,12 @@ function Scheduler.SetErrorHandler(_: Scheduler, handler: (thread: VMTypes.LuaTh
 	errorHandler = handler
 end
 
-function Scheduler.FromFunction(_: Scheduler, luaState: VMTypes.LuaState, position: number?, ...)
+function Scheduler.FromFunction(_: Scheduler, luaState: VMTypes.LuaState, ...)
 	local thread = cFunctions.lua_newthread(luaState)
 
 	VMMacros.lua_pop(luaState, 1)
 
-	cFunctions.lua_xmove(luaState, thread, position)
+	cFunctions.lua_xmove(luaState, thread, 1)
 	
 	VMMacros.lua_pop(luaState, 1)
 

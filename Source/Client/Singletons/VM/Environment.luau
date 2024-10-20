@@ -16,6 +16,7 @@ local RobloxSharedTable = require(Package.Client.Singletons.VM.Roblox.SharedTabl
 local RobloxEnvironmentTable = require(Package.Client.Singletons.VM.Roblox.EnvironmentTable)
 
 local InstanceLibrary = require(Package.Client.Singletons.VM.Roblox.Libraries.Instance)
+local TaskLibrary = require(Package.Client.Singletons.VM.Roblox.Libraries.Task)
 
 local cFunctions = LuauCeption.wasm.cfns
 
@@ -32,6 +33,7 @@ function Environment.WriteEnvironment(_: Environment, luaState: VMTypes.LuaState
 	RobloxGlobals(luaState)
 
 	InstanceLibrary(luaState)
+	TaskLibrary(luaState)
 end
 
 --[[

@@ -29,10 +29,11 @@ local Bindings = {}
 ]]
 function Bindings.DebugStack(self: Bindings, luaState: Types.LuaState)
 	local stackSize = cFunctions.lua_gettop(luaState)
+	local cappedStackSize = math.clamp(stackSize, 1, 50)
 
-	print(`STACK SIZE: {stackSize}\n{string.rep("-", 50)}`)
+	print(`STACK SIZE: {stackSize}\n{string.rep("-", 50)}{cappedStackSize < stackSize and "+" or ""}`)
 
-	for index = 1, stackSize do
+	for index = 1, cappedStackSize do
 		local type = self:ReadCString(cFunctions.luaL_typename(luaState, index))
 		local value = self:ToLuau(luaState, index)
 
@@ -334,7 +335,7 @@ function Bindings.ToLuau<T>(self: Bindings, luaState: Types.LuaState, position: 
 		local boolValue = cFunctions.lua_toboolean(luaState, position)
 
 		return (boolValue == 1 and true or false) :: any
-	elseif typeName == "function" then
+	elseif typeName == "function" or typeName == "thread" then
 		local functionName = VMMacros.lua_tostring(luaState, position)
 
 		return Bindings:ReadCString(functionName) :: any
