@@ -49,7 +49,7 @@ function Scheduler.AddThreadToQueue(self: Scheduler, thread: VMTypes.LuaThread, 
 		local status = self:Status(thread, from)
 
 		if status == "suspended" then
-			self:Resume(thread, from, table.unpack(args, 1, args.n))
+			self:Resume(thread, from, table.unpack(args))
 		end
 	end)
 end

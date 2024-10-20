@@ -51,6 +51,7 @@ function VM.Run(self: VM)
 	local thread = VMScheduler:Create(self.LuaState)
 
 	VMMacros.lua_pop(self.LuaState, 1)
+
 	cFunctions.lua_xmove(self.LuaState, thread, 1)
 
 	VMScheduler:AddThreadToQueue(thread, self.LuaState)

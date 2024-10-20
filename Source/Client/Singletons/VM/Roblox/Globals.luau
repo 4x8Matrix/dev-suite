@@ -16,17 +16,23 @@ local function delayImpl(luaState: VMTypes.LuaState)
 	local timeToWait = cFunctions.luaL_checknumber(luaState, 1)
 	local thread = VMScheduler:Create(luaState)
 
+	VMMacros.lua_pop(luaState, 1)
+
+	cFunctions.lua_xmove(luaState, thread, 1)
+
 	task.delay(timeToWait, function()
 		VMScheduler:AddThreadToQueue(thread, luaState)
 	end)
-
-	VMMacros.lua_pop(luaState, 1)
 
 	return 0
 end
 
 local function spawnImpl(luaState: VMTypes.LuaState)
 	local thread = VMScheduler:Create(luaState)
+
+	VMMacros.lua_pop(luaState, 1)
+
+	cFunctions.lua_xmove(luaState, thread, 1)
 
 	VMScheduler:AddFunctionToQueue(function()
 		VMScheduler:Resume(thread, luaState)
@@ -40,7 +46,9 @@ local function waitImpl(luaState: VMTypes.LuaState)
 	local clockStart = os.clock()
 
 	task.delay(timeToWait, function()
-		VMScheduler:AddThreadToQueue(luaState, nil, table.pack(os.clock() - clockStart))
+		VMScheduler:AddFunctionToQueue(function()
+			VMScheduler:Resume(luaState, nil, table.pack(os.clock() - clockStart))
+		end)
 	end)
 
 	return VMScheduler:Yield(luaState, 1)
