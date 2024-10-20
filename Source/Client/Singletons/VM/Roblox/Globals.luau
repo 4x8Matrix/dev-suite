@@ -14,14 +14,10 @@ local cFunctions = LuauCeption.wasm.cfns
 
 local function delayImpl(luaState: VMTypes.LuaState)
 	local timeToWait = cFunctions.luaL_checknumber(luaState, 1)
-	local thread = VMScheduler:FromFunction(luaState, 2)
-
-	VMScheduler:SetThreadFlag(thread, "IGNORED", true)
+	local thread = VMScheduler:Create(luaState)
 
 	task.delay(timeToWait, function()
-		VMScheduler:SetThreadFlag(thread, "IGNORED", nil)
-		
-		VMScheduler:ResumeThread(thread, luaState)
+		VMScheduler:AddThreadToQueue(thread, luaState)
 	end)
 
 	VMMacros.lua_pop(luaState, 1)
@@ -30,7 +26,11 @@ local function delayImpl(luaState: VMTypes.LuaState)
 end
 
 local function spawnImpl(luaState: VMTypes.LuaState)
-	VMScheduler:FromFunction(luaState, 1, 0, elapsedTime())
+	local thread = VMScheduler:Create(luaState)
+
+	VMScheduler:AddFunctionToQueue(function()
+		VMScheduler:Resume(thread, luaState)
+	end)
 
 	return 0
 end
@@ -39,15 +39,11 @@ local function waitImpl(luaState: VMTypes.LuaState)
 	local timeToWait = cFunctions.luaL_checknumber(luaState, 1)
 	local clockStart = os.clock()
 
-	VMScheduler:SetThreadFlag(luaState, "IGNORED", true)
-
 	task.delay(timeToWait, function()
-		VMScheduler:SetThreadFlag(luaState, "IGNORED", nil)
-		
-		VMScheduler:ResumeThread(luaState, 0, table.pack(os.clock() - clockStart))
+		VMScheduler:AddThreadToQueue(luaState, nil, table.pack(os.clock() - clockStart))
 	end)
 
-	return VMScheduler:YieldThread(luaState, 1)
+	return VMScheduler:Yield(luaState, 1)
 end
 
 local function elapsedTimeImpl(luaState: VMTypes.LuaState)

@@ -8,7 +8,7 @@ local LuauCeption = require(Package.Vendor.LuauCeption)
 
 local VMBindings = require(Package.Client.Singletons.VM.Bindings)
 local VMEnvironment = require(Package.Client.Singletons.VM.Environment)
-local VMConstants = require(Package.Client.Singletons.VM.Constants)
+local VMMacros = require(Package.Client.Singletons.VM.Macros)
 local VMScheduler = require(Package.Client.Singletons.VM.Scheduler)
 
 local LUAU_OPTIMISATION_LEVEL = 1
@@ -48,10 +48,12 @@ end
 	
 ]]
 function VM.Run(self: VM)
-	local thread = VMScheduler:FromFunction(self.LuaState, 1)
-	local state = VMScheduler:Await(thread, VMConstants.lua_CoStatus.LUA_COERR, VMConstants.lua_CoStatus.LUA_COFIN)
+	local thread = VMScheduler:Create(self.LuaState)
 
-	return state == VMConstants.lua_CoStatus.LUA_COFIN
+	VMMacros.lua_pop(self.LuaState, 1)
+	cFunctions.lua_xmove(self.LuaState, thread, 1)
+
+	VMScheduler:AddThreadToQueue(thread, self.LuaState)
 end
 
 --[[
@@ -69,11 +71,10 @@ function VM.OnStart(self: VM)
 	self.LuaState = cFunctions.luaL_newstate()
 
 	cFunctions.luaL_openlibs(self.LuaState)
-
 	VMEnvironment:WriteEnvironment(self.LuaState)
-
 	-- cFunctions.luaL_sandbox(luaState)
-	VMScheduler:Run(self.LuaState)
+
+	VMScheduler:StartScheduler()
 	VMScheduler:SetErrorHandler(function(_, _, message)
 		warn(`Thread Error:`, message)
 	end)
