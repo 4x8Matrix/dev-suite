@@ -17,7 +17,6 @@ local function delayImpl(luaState: VMTypes.LuaState)
 	local thread = VMScheduler:Create(luaState)
 
 	VMMacros.lua_pop(luaState, 1)
-
 	cFunctions.lua_xmove(luaState, thread, 1)
 
 	task.delay(timeToWait, function()
@@ -31,7 +30,6 @@ local function spawnImpl(luaState: VMTypes.LuaState)
 	local thread = VMScheduler:Create(luaState)
 
 	VMMacros.lua_pop(luaState, 1)
-
 	cFunctions.lua_xmove(luaState, thread, 1)
 
 	VMScheduler:AddFunctionToQueue(function()
@@ -42,12 +40,14 @@ local function spawnImpl(luaState: VMTypes.LuaState)
 end
 
 local function waitImpl(luaState: VMTypes.LuaState)
-	local timeToWait = cFunctions.luaL_checknumber(luaState, 1)
+	local timeToWait = VMMacros.lua_tonumber(luaState, 1)
 	local clockStart = os.clock()
+
+	-- VMBindings:DebugStack(luaState)
 
 	task.delay(timeToWait, function()
 		VMScheduler:AddFunctionToQueue(function()
-			VMScheduler:Resume(luaState, nil, table.pack(os.clock() - clockStart))
+			VMScheduler:Resume(luaState, nil, os.clock() - clockStart)
 		end)
 	end)
 
@@ -181,10 +181,13 @@ return function(luaState: VMTypes.LuaState)
 	-- instances
 	VMBindings:LoadInstance(luaState, workspace)
     VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("workspace"))
-	
+
 	VMBindings:LoadInstance(luaState, game)
     VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("game"))
 
 	VMBindings:LoadInstance(luaState, Instance.new("Script"))
     VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("script"))
+
+	VMBindings:LoadInstance(luaState, Enum)
+    VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("Enum"))
 end

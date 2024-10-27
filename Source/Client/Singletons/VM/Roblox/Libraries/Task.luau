@@ -83,7 +83,7 @@ local function wait(luaState: VMTypes.LuaState)
 
 	task.delay(timeToWait, function()
 		VMScheduler:AddFunctionToQueue(function()
-			VMScheduler:Resume(luaState, nil, table.pack(os.clock() - clockStart))
+			VMScheduler:Resume(luaState, nil, os.clock() - clockStart)
 		end)
 	end)
 
@@ -113,7 +113,7 @@ return function(luaState: VMTypes.LuaState)
 
 	for name, callback in callbacks do
 		VMMacros.lua_pushcfunction(luaState, VMBindings:LoadCFunction(luaState, callback), VMBindings:LoadCString(name))
-		cFunctions.lua_setfield (luaState, -2, VMBindings:LoadCString(name))
+		cFunctions.lua_setfield(luaState, -2, VMBindings:LoadCString(name))
 	end
 
 	VMMacros.lua_setglobal(luaState, VMBindings:LoadCString("task"))

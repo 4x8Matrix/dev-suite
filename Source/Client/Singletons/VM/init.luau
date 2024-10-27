@@ -11,6 +11,8 @@ local VMEnvironment = require(Package.Client.Singletons.VM.Environment)
 local VMMacros = require(Package.Client.Singletons.VM.Macros)
 local VMScheduler = require(Package.Client.Singletons.VM.Scheduler)
 
+local SignalHook = require(Package.Client.Singletons.VM.Roblox.Hooks.Signal)
+
 local LUAU_OPTIMISATION_LEVEL = 1
 local LUAU_DEBUG_LEVEL = 1
 local LUAU_COVERAGE_LEVEL = 0
@@ -51,7 +53,6 @@ function VM.Run(self: VM)
 	local thread = VMScheduler:Create(self.LuaState)
 
 	VMMacros.lua_pop(self.LuaState, 1)
-
 	cFunctions.lua_xmove(self.LuaState, thread, 1)
 
 	VMScheduler:AddThreadToQueue(thread, self.LuaState)
@@ -75,8 +76,10 @@ function VM.OnStart(self: VM)
 	VMEnvironment:WriteEnvironment(self.LuaState)
 	-- cFunctions.luaL_sandbox(luaState)
 
+	SignalHook()
+
 	VMScheduler:StartScheduler()
-	VMScheduler:SetErrorHandler(function(_, _, message)
+	VMScheduler:SetErrorHandler(function(_, message)
 		warn(`Thread Error:`, message)
 	end)
 end

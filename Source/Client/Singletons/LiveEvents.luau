@@ -86,6 +86,7 @@ function LiveEvents.OnStart(self: LiveEvents)
 
 	self:AddIgnoredProperty(`Parent`)
 	self:AddIgnoredProperty(`TopbarInset`)
+	self:AddIgnoredProperty(`NetworkIsSleeping`)
 
 	Players.LocalPlayer.CharacterAdded:Connect(function()
 		self:AddIgnoredInstance(Players.LocalPlayer.Character)
