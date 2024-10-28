@@ -43,8 +43,6 @@ local function connect(luaState: VMTypes.LuaState, signal: RBXScriptSignal)
 	local connection = signal:Connect(function(...)
 		local thread = VMScheduler:Create(luaState)
 
-		print("creating thread for:", signal)
-
 		VMMacros.lua_pop(luaState, 1)
 		cFunctions.lua_rawgeti(luaState, VMConstants.LUA_REGISTRYINDEX, functionRef)
 		cFunctions.lua_xmove(luaState, thread, 1)

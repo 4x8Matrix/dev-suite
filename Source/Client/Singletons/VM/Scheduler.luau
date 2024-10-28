@@ -101,7 +101,8 @@ end
 
 ]]
 function Scheduler.Cleanup(_: Scheduler, luaState: VMTypes.LuaState, thread: VMTypes.LuaThread)
-	VMContext:UpdateValue(`scheduler.thread.{thread}`, function(ref)
+	VMContext:UpdateValue(`Scheduler.thread.{thread}`, function(ref)
+		warn(thread, VMContext:GetMap())
 		cFunctions.lua_unref(luaState, ref)
 		cFunctions.lua_resetthread(thread)
 	end)
@@ -137,7 +138,7 @@ function Scheduler.Create(_: Scheduler, luaState: VMTypes.LuaState): VMTypes.Lua
 
 	threadCount += 1
 
-	VMContext:SetValue(`scheduler.thread.{thread}`, ref)
+	VMContext:SetValue(`Scheduler.thread.{thread}`, ref)
 
 	return thread
 end

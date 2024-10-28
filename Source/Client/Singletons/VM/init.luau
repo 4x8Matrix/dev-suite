@@ -66,8 +66,6 @@ function VM.Run(self: VM)
 		end
 
 		print(status)
-
-		VMScheduler:Cleanup(self.LuaState, thread)
 	end)
 end
 

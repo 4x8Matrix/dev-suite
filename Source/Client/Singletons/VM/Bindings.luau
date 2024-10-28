@@ -109,7 +109,17 @@ end
 	Pops an instance, in the Roblox engine onto the top of the Luau VMs stack
 ]]
 function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, instance: any)
+	uuidCounter += 1
+
+	VMContext:SetValue(`userdata-{uuidCounter}`, instance)
+
 	VMMacros.lua_newuserdata(luaState, 16)
+
+	cFunctions.lua_setuserdatatag(luaState, -1, uuidCounter)
+	cFunctions.lua_setuserdatadtor(luaState, uuidCounter, self:LoadCFunction(luaState, function()
+		VMContext:SetValue(`userdata-{uuidCounter}`, nil)
+	end))
+
 	VMMacros.lua_newtable(luaState)
 
 	local metamethods = VMContext:GetValue(`metatable.methods.source`)
@@ -303,11 +313,6 @@ function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, insta
 
 				return 1
 			end),
-			__gc = self:LoadCFunction(luaState, function(luaState)
-				warn("cleanup!")
-
-				return 0
-			end),
 			__iter = notImplemented("__iter"),
    
 		}
@@ -328,13 +333,6 @@ function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, insta
 	cFunctions.lua_pushstring(luaState, self:LoadCString(typeof(instance)))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__type"))
 
-	cFunctions.lua_pushstring(luaState, self:LoadCString(`{uuidCounter}`))
-	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__uuid"))
-
-	VMContext:SetValue(`userdata-{uuidCounter}`, instance)
-
-	uuidCounter += 1
-
 	cFunctions.lua_setmetatable(luaState, -2)
 end
 
@@ -346,8 +344,6 @@ function Bindings.ToLuau<T>(self: Bindings, luaState: VMTypes.LuaState, position
 	local typeNamePointer = cFunctions.luaL_typename(luaState, position)
 	local typeName = self:ReadCString(typeNamePointer)
 	
-	local top = cFunctions.lua_gettop(luaState)
-
 	if typeName == "number" then
 		local number = VMMacros.lua_tonumber(luaState, position)
 
@@ -404,16 +400,9 @@ function Bindings.ToLuau<T>(self: Bindings, luaState: VMTypes.LuaState, position
 		or typeName == "Vector3"
 		or typeName == "Vector3int16"
 	then
-		cFunctions.lua_getmetatable(luaState, position)
-		cFunctions.lua_getfield(luaState, top + 1, self:LoadCString("__uuid"))
+		local tag = cFunctions.lua_userdatatag(luaState, position)
 
-		local instanceUuidPointer = VMMacros.lua_tostring(luaState, top + 2)
-		local instanceUuid = self:ReadCString(instanceUuidPointer)
-
-		VMMacros.lua_pop(luaState, 1)
-		VMMacros.lua_pop(luaState, 1)
-
-		return VMContext:GetValue(`userdata-{instanceUuid}`) :: any
+		return VMContext:GetValue(`userdata-{tag}`) :: any
 	elseif typeName == "userdata" then
 		local userdataName = VMMacros.lua_tostring(luaState, position)
 
