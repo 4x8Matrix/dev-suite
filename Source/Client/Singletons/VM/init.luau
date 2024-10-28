@@ -10,6 +10,7 @@ local VMBindings = require(Package.Client.Singletons.VM.Bindings)
 local VMEnvironment = require(Package.Client.Singletons.VM.Environment)
 local VMMacros = require(Package.Client.Singletons.VM.Macros)
 local VMScheduler = require(Package.Client.Singletons.VM.Scheduler)
+local VMContext = require(Package.Client.Singletons.VM.Context)
 
 local SignalHook = require(Package.Client.Singletons.VM.Roblox.Hooks.Signal)
 
@@ -55,7 +56,19 @@ function VM.Run(self: VM)
 	VMMacros.lua_pop(self.LuaState, 1)
 	cFunctions.lua_xmove(self.LuaState, thread, 1)
 
-	VMScheduler:AddThreadToQueue(thread, self.LuaState)
+	VMScheduler:AddFunctionToQueue(function()
+		VMScheduler:Resume(thread, self.LuaState)
+
+		local status = VMScheduler:Status(thread, self.LuaState)
+
+		while status == "running" do
+			task.wait()
+		end
+
+		print(status)
+
+		VMScheduler:Cleanup(self.LuaState, thread)
+	end)
 end
 
 --[[

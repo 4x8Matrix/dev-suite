@@ -9,13 +9,11 @@
 
 local Package = script.Parent.Parent.Parent.Parent
 
-local Macros = require(script.Parent.Macros)
 local LuauCeption = require(Package.Vendor.LuauCeption)
 
 local VMMacros = require(Package.Client.Singletons.VM.Macros)
 local VMContext = require(Package.Client.Singletons.VM.Context)
-local VMConstants = require(Package.Client.Singletons.VM.Constants)
-local Types = require(Package.Client.Singletons.VM.Types)
+local VMTypes = require(Package.Client.Singletons.VM.Types)
 
 local runtime = LuauCeption.wasm.rt
 local store = runtime.store
@@ -29,7 +27,7 @@ local Bindings = {}
 --[[
 	
 ]]
-function Bindings.DebugStack(self: Bindings, luaState: Types.LuaState, dontToLuau: boolean?)
+function Bindings.DebugStack(self: Bindings, luaState: VMTypes.LuaState, dontToLuau: boolean?)
 	local stackSize = cFunctions.lua_gettop(luaState)
 	local cappedStackSize = math.clamp(stackSize, 1, 50)
 
@@ -56,7 +54,7 @@ end
 --[[
 	Responsible for loading a luau string, into the wasm llvm, will return a pointer.
 ]]
-function Bindings.LoadCString(_: Bindings, source: string): Types.CPointer
+function Bindings.LoadCString(_: Bindings, source: string): VMTypes.CPointer
 	local stringLength = #source
     local stringPointer = cFunctions.malloc(stringLength + 1)
 
@@ -69,7 +67,7 @@ end
 --[[
 	Responsible for reading from a pointer, and returning the luau string at that offset.
 ]]
-function Bindings.ReadCString(_: Bindings, pointer: Types.CPointer): string
+function Bindings.ReadCString(_: Bindings, pointer: VMTypes.CPointer): string
 	local stringLength = cFunctions.strlen(pointer)
 
 	return buffer.readstring(LuauCeption.wasm.memory.data, pointer, stringLength)
@@ -78,7 +76,7 @@ end
 --[[
 	Responsible for wrapping a C function as a luau function, allowing you to create C functions in the Luau VM.
 ]]
-function Bindings.LoadCFunction(self: Bindings, luaState: Types.LuaState, source: (Types.LuaState) -> number): Types.CPointer
+function Bindings.LoadCFunction(self: Bindings, luaState: VMTypes.LuaState, source: (VMTypes.LuaState) -> number): VMTypes.CPointer
 	local pointer = #LuauCeption.wasm.indirect_function_table.data + 1
 
 	LuauCeption.wasm.indirect_function_table.data[pointer] = function(...)
@@ -99,7 +97,7 @@ end
 --[[
 	
 ]]
-function Bindings.OverwriteCFunction(_: Bindings, cPointer: Types.CPointer, source: (Types.LuaState) -> number)
+function Bindings.OverwriteCFunction(_: Bindings, cPointer: VMTypes.CPointer, source: (VMTypes.LuaState) -> number)
 	local oldSource = LuauCeption.wasm.indirect_function_table.data[cPointer]
 	
 	LuauCeption.wasm.indirect_function_table.data[cPointer] = source
@@ -110,26 +108,8 @@ end
 --[[
 	Pops an instance, in the Roblox engine onto the top of the Luau VMs stack
 ]]
-function Bindings.LoadInstance(self: Bindings, luaState: Types.LuaState, instance: any, deallocator: () -> ()?)
-	local instanceTable = VMContext:GetValue(`instance.source`, {})
-	local instanceRef = instanceTable[instance]
-
-	if instanceRef then
-		cFunctions.lua_rawgeti(luaState, VMConstants.LUA_REGISTRYINDEX, instanceRef)
-
-		return
-	end
-
-	cFunctions.lua_newuserdatadtor(luaState, 16, self:LoadCFunction(luaState, function()
-		cFunctions.lua_unref(luaState, instanceRef) -- set a few lines down!
-
-		instanceTable[instance] = nil
-		
-		if deallocator then
-			deallocator()
-		end
-	end))
-
+function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, instance: any)
+	VMMacros.lua_newuserdata(luaState, 16)
 	VMMacros.lua_newtable(luaState)
 
 	local metamethods = VMContext:GetValue(`metatable.methods.source`)
@@ -323,6 +303,11 @@ function Bindings.LoadInstance(self: Bindings, luaState: Types.LuaState, instanc
 
 				return 1
 			end),
+			__gc = self:LoadCFunction(luaState, function(luaState)
+				warn("cleanup!")
+
+				return 0
+			end),
 			__iter = notImplemented("__iter"),
    
 		}
@@ -351,18 +336,13 @@ function Bindings.LoadInstance(self: Bindings, luaState: Types.LuaState, instanc
 	uuidCounter += 1
 
 	cFunctions.lua_setmetatable(luaState, -2)
-	
-	instanceRef = cFunctions.lua_ref(luaState, cFunctions.lua_gettop(luaState))
-	instanceTable[instance] = instanceRef
-
-	VMContext:SetValue(`instance.source`, instanceTable)
 end
 
 --[[
 	Pulls the last object on the VM's lua stack, and translates it from the C datatype into a value
 	we can use in luau.
 ]]
-function Bindings.ToLuau<T>(self: Bindings, luaState: Types.LuaState, position: number): T
+function Bindings.ToLuau<T>(self: Bindings, luaState: VMTypes.LuaState, position: number): T
 	local typeNamePointer = cFunctions.luaL_typename(luaState, position)
 	local typeName = self:ReadCString(typeNamePointer)
 	
@@ -430,8 +410,8 @@ function Bindings.ToLuau<T>(self: Bindings, luaState: Types.LuaState, position: 
 		local instanceUuidPointer = VMMacros.lua_tostring(luaState, top + 2)
 		local instanceUuid = self:ReadCString(instanceUuidPointer)
 
-		Macros.lua_pop(luaState, 1)
-		Macros.lua_pop(luaState, 1)
+		VMMacros.lua_pop(luaState, 1)
+		VMMacros.lua_pop(luaState, 1)
 
 		return VMContext:GetValue(`userdata-{instanceUuid}`) :: any
 	elseif typeName == "userdata" then
@@ -473,7 +453,7 @@ end
 --[[
 	Pops a value from luau, into any c datatype, and pushes it onto the top of the lua stack.
 ]]
-function Bindings.FromLuau(self: Bindings, luaState: Types.LuaState, value: any): ()
+function Bindings.FromLuau(self: Bindings, luaState: VMTypes.LuaState, value: any): ()
 	local valueType = typeof(value)
 
 	if valueType == "number" then
@@ -549,7 +529,7 @@ end
 --[[
 	Errors the Luau VM
 ]]
-function Bindings.Error(_: Bindings, luaState: Types.LuaState, errorPointer: Types.CPointer)
+function Bindings.Error(_: Bindings, luaState: VMTypes.LuaState, errorPointer: VMTypes.CPointer)
 	cFunctions.lua_pushstring(luaState, errorPointer)
 	cFunctions.lua_error(luaState)
 end

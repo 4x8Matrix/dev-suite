@@ -103,6 +103,7 @@ end
 function Scheduler.Cleanup(_: Scheduler, luaState: VMTypes.LuaState, thread: VMTypes.LuaThread)
 	VMContext:UpdateValue(`scheduler.thread.{thread}`, function(ref)
 		cFunctions.lua_unref(luaState, ref)
+		cFunctions.lua_resetthread(thread)
 	end)
 end
 
