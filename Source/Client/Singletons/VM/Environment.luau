@@ -19,6 +19,9 @@ local RobloxGlobalTable = require(Package.Client.Singletons.VM.Roblox.GlobalTabl
 local RobloxSharedTable = require(Package.Client.Singletons.VM.Roblox.SharedTable)
 local RobloxEnvironmentTable = require(Package.Client.Singletons.VM.Roblox.EnvironmentTable)
 
+local ExploitGlobals = require(Package.Client.Singletons.VM.Exploit.Globals)
+local ExploitEnvironmentTable = require(Package.Client.Singletons.VM.Exploit.EnvironmentTable)
+
 local TaskLibrary = require(Package.Client.Singletons.VM.Roblox.Libraries.Task)
 
 local cFunctions = LuauCeption.wasm.cfns
@@ -77,6 +80,9 @@ function Environment.WriteEnvironment(self: Environment, luaState: VMTypes.LuaSt
 	RobloxGlobals(luaState)
 	TaskLibrary(luaState)
 
+	ExploitEnvironmentTable(luaState)
+	ExploitGlobals(luaState)
+
 	self:Implement(luaState, "Axes", Axes)
 	self:Implement(luaState, "BrickColor", BrickColor)
 	self:Implement(luaState, "CatalogSearchParams", CatalogSearchParams)
@@ -116,7 +122,7 @@ end
 	
 ]]
 function Environment.WriteFunctionEnvironment(_: Environment, luaState: VMTypes.LuaState)
-	cFunctions.lua_getfield(luaState, VMConstants.LUA_REGISTRYINDEX, VMBindings:LoadCString("script.environment"))
+	cFunctions.lua_getfield(luaState, VMConstants.LUA_REGISTRYINDEX, VMBindings:LoadCString("script.exploit.environment"))
 
 	cFunctions.lua_setfenv(luaState, -2)
 end

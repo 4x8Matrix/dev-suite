@@ -24,6 +24,8 @@ local function disconnect(luaState: VMTypes.LuaState, connection: RBXScriptConne
 		return refsTable
 	end)
 
+	VMContext:SetValue(connection, nil)
+
 	return 0
 end
 

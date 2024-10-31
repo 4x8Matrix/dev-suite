@@ -12,7 +12,7 @@ local VMScheduler = require(Package.Client.Singletons.VM.Scheduler)
 
 local cFunctions = LuauCeption.wasm.cfns
 
-local function addFunctionRef(connection: RBXScriptConnection, functionRef: number)
+local function addFunctionRef(signal: RBXScriptSignal, connection: RBXScriptConnection, functionRef: number)
 	VMContext:UpdateValue("RBXScriptSignal.functionRefs", function(refs)
 		local refsTable = refs or {}
 
@@ -20,6 +20,8 @@ local function addFunctionRef(connection: RBXScriptConnection, functionRef: numb
 
 		return refsTable
 	end)
+
+	VMContext:SetValue(connection, signal)
 end
 
 local function removeFunctionRef(luaState: VMTypes.LuaState, connection: RBXScriptConnection)
@@ -36,6 +38,8 @@ local function removeFunctionRef(luaState: VMTypes.LuaState, connection: RBXScri
 
 		return refsTable
 	end)
+
+	VMContext:SetValue(connection, nil)
 end
 
 local function connect(luaState: VMTypes.LuaState, signal: RBXScriptSignal)
@@ -51,7 +55,7 @@ local function connect(luaState: VMTypes.LuaState, signal: RBXScriptSignal)
 	end)
 
 	VMBindings:FromLuau(luaState, connection)
-	addFunctionRef(connection, functionRef)
+	addFunctionRef(signal, connection, functionRef)
 
 	return 1
 end
@@ -73,7 +77,7 @@ local function once(luaState: VMTypes.LuaState, signal: RBXScriptSignal)
 	end)
 
 	VMBindings:FromLuau(luaState, connection)
-	addFunctionRef(connection, functionRef)
+	addFunctionRef(signal, connection, functionRef)
 
 	return 1
 end
