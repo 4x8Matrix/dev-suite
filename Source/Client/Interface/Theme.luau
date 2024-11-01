@@ -21,6 +21,7 @@ return {
 	ServerColor3 = Color3.fromRGB(3, 207, 68),
 
 	AccentColor3 = Color3.fromHex("#0b5aaf"),
+	ErrorColor3 = Color3.fromHex("#df2121"),
 
 	EventIconColor = Color3.fromHex("#ffff00"),
 	FunctionIconColor = Color3.fromHex("#fa98fb"),

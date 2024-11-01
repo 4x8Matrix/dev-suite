@@ -282,6 +282,10 @@ function Properties.Setup(_: FusionTypes.Scope, value: FusionTypes.Value<Instanc
 	fusionValue = value
 end
 
+function Properties.Stop(_: FusionTypes.Scope)
+	currentlyRenderingInstance = nil
+end
+
 function Properties.RenderEmptyPage(scope: FusionTypes.Scope, scrollingFrame: ScrollingFrame)
 	scope:New("Frame")({
 		Parent = scrollingFrame,

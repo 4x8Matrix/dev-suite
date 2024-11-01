@@ -87,8 +87,7 @@ function Explorer.Render(scope: Scope, props: Props)
 
 	table.insert(scope, function()
 		UIExplorer.Reset()
-
-		props.explorer.selectedInstance:set(nil)
+		UIProperties.Stop(scope)
 	end)
 
 	return scope:New("Frame")({

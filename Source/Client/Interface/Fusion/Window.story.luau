@@ -47,7 +47,7 @@ return function(parent)
 			clickToSelect = scope:Value(nil),
 			showSelection = scope:Value(nil),
 
-			selectedInstance = scope:Value(nil),
+			selectedInstance = scope:Value(game.ReplicatedStorage.ModuleScript),
 		},
 
 		logging = {
