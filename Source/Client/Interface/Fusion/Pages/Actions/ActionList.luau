@@ -285,8 +285,6 @@ function ActionList.Render(
 		}),
 	}
 
-	warn(actionNodes)
-
 	if #actionNodes.children == 0 then
 		return ActionList.RenderEmptyPage(scope)
 	end

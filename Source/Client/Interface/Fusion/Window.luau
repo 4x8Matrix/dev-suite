@@ -147,6 +147,12 @@ return function(scope: FusionTypes.Scope, props: {
 		ResetOnSpawn = false,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 
+		Enabled = scope:Computed(function(use)
+			local value = use(tween)
+
+			return value ~= 0
+		end),
+
 		[Fusion.Children] = {
 			ContentFrame = scope:New("CanvasGroup")({
 				AnchorPoint = Vector2.new(0.5, 0.5),
