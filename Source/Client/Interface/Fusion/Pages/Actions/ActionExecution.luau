@@ -54,7 +54,7 @@ function ActionExecution.Render(
 		selectedAction: FusionTypes.Value<Action>,
 		closedFolders: FusionTypes.Value<{ string }>
 	},
-	executeSignal: SignalTypes.Signal<string>
+	executeSignal: SignalTypes.Signal<string, { any }>
 )
 	local selectedAction = Fusion.peek(values.selectedAction)
 	local argumentObjects = {}
@@ -110,6 +110,8 @@ function ActionExecution.Render(
 					defaultValue = Players.LocalPlayer.Name
 				elseif argument.type == "Number" then
 					defaultValue = "0"
+				elseif argument.type == "Boolean" then
+					defaultValue = "false"
 				end
 			end
 
@@ -139,12 +141,22 @@ function ActionExecution.Render(
 						value = textBox.Text
 
 						validInput = value ~= nil
+					elseif argument.type == "Boolean" then
+						if string.lower(textBox.Text) == "true" then
+							value = true
+						elseif  string.lower(textBox.Text) == "false" then
+							value = false
+						else
+							value = nil
+						end
+
+						validInput = value ~= nil
 					end
 
 					if validInput then
 						arguments[argumentIndex] = value
 					else
-						textBox.Text = ``
+						textBox.Text = tostring(defaultValue)
 					end
 				end,
 
@@ -296,7 +308,7 @@ function ActionExecution.Render(
 			BackgroundColor3 = selectedAction.context == "Server" and Theme.ServerColor3 or Theme.ClientColor3,
 
 			[Fusion.OnEvent("Activated")] = function()
-				executeSignal:Fire(selectedAction.uuid)
+				executeSignal:Fire(selectedAction.uuid, arguments)
 			end,
 
 			[Fusion.Children] = {

@@ -49,8 +49,11 @@ local eventsArray = windowScope:Value({})
 local selectedPage = windowScope:Value(nil)
 
 local selectedInstanceValue = windowScope:Value(nil)
+local actionsList = windowScope:Value({})
 
 local Interface = {}
+
+Interface.ExecuteActionRequested = Signal.new()
 
 Interface.MinimiseWindowRequested = Signal.new()
 Interface.OpenWindowRequested = Signal.new()
@@ -116,6 +119,12 @@ function Interface.CreateInterface(self: Interface)
 			selectedInstance = selectedInstanceValue,
 		},
 
+		actions = {
+			closedFolders = windowScope:Value({}),
+
+			actions = actionsList
+		},
+
 		liveEvents = {
 			events = eventsArray,
 		},
@@ -131,6 +140,10 @@ function Interface.CreateInterface(self: Interface)
 
 		signals = {
 			minimiseWindow = self.MinimiseWindowRequested,
+
+			actions = {
+				executeAction = self.ExecuteActionRequested,
+			},
 
 			logging = {
 				exportLogs = self.ExportLogsRequested,
@@ -241,17 +254,24 @@ function Interface.SetSelectedInstance(_: Interface, instance: Instance)
 end
 
 --[[
-	Responsible for setting the selected instance in the logs tab
+	
 ]]
 function Interface.SetLogs(_: Interface, logs: { [any]: any })
 	logsArray:set(logs)
 end
 
 --[[
-	Responsible for setting the selected instance in the live events tab.
+	
 ]]
 function Interface.SetLiveEvents(_: Interface, events: { [any]: any })
 	eventsArray:set(events)
+end
+
+--[[
+	
+]]
+function Interface.SetActions(_: Interface, actions: { [any]: any })
+	actionsList:set(actions)
 end
 
 --[[

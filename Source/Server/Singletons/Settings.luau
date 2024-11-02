@@ -2,6 +2,8 @@ local Package = script.Parent.Parent.Parent
 
 local Signal = require(Package.Parent.Signal)
 
+local Authentication = require(Package.Server.Singletons.Authentication)
+
 local Network = require(Package.Server.Network)
 
 local serverSettings: SettingOptions = {
@@ -23,18 +25,18 @@ function Settings.UpdateServerSettings(self: Settings, settings: SettingOptions)
 end
 
 function Settings.OnStart(self: Settings)
-	local function generateSettingsTableForCline()
+	local function generateSettingsTableForClient()
 		return {
 			DefaultHotkey = serverSettings.DefaultHotkey.Name
 		}
 	end
 
 	self.OnUpdated:Connect(function()
-		Network.ServerSettingsUpdated:FireAll(generateSettingsTableForCline())
+		Network.ServerSettingsUpdated.FireList(Authentication:GetListOfAuthenticatedPlayers(), generateSettingsTableForClient())
 	end)
 
 	Network.FetchSettingsRequested.SetCallback(function()
-		return generateSettingsTableForCline()
+		return generateSettingsTableForClient()
 	end)
 end
 

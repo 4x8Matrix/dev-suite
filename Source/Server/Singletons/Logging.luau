@@ -64,7 +64,7 @@ function Logging.OnStart(self: Logging)
 	end)
 
 	while true do
-		task.wait(1)
+		task.wait(0.1)
 
 		if #logObjectsToSendToClient == 0 then
 			continue

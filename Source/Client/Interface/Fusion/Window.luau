@@ -33,11 +33,6 @@ return function(scope: FusionTypes.Scope, props: {
 
 		selectedInstance: FusionTypes.Value<Instance>
 	},
-
-	sandbox: {
-		runtime: FusionTypes.Value<string>,
-		availableRuntimes: FusionTypes.Value<{ string }>,
-	},
 	
 	actions: {
 		closedFolders: FusionTypes.Value<{ string }>,
@@ -214,7 +209,6 @@ return function(scope: FusionTypes.Scope, props: {
 								selectedPage = props.selectedPage,
 								signals = props.signals,
 								explorer = props.explorer,
-								sandbox = props.sandbox,
 								interceptor = props.interceptor,
 								logging = props.logging,
 								liveEvents = props.liveEvents,

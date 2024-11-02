@@ -19,6 +19,26 @@ type Log = struct {
 	time: u32
 }
 
+type EncodedActionArgument = struct {
+	type: string,
+	value: string,
+}
+
+type ActionArgument = struct {
+	type: string,
+	name: string,
+	default: string?
+}
+
+type Action = struct {
+	path: string[],
+	name: string,
+	description: string,
+	uuid: string,
+	
+	arguments: ActionArgument[]
+}
+
 funct AuthenticateRequested = {
     call: Async,
     rets: enum { Accepted, Rejected },
@@ -55,4 +75,27 @@ event ClientReportingLogs = {
 	type: Reliable,
 	call: ManyAsync,
     data: Log[]
+}
+
+event FetchActionsRequested = {
+	from: Client,
+	type: Reliable,
+	call: ManyAsync
+}
+
+event ServerReportingActions = {
+	from: Server,
+	type: Reliable,
+	call: ManyAsync,
+    data: Action[]
+}
+
+event ExecuteServerActionRequested = {
+	from: Client,
+	type: Reliable,
+	call: ManyAsync,
+    data: struct {
+		actionUuid: string,
+		arguments: EncodedActionArgument[]
+	}
 }

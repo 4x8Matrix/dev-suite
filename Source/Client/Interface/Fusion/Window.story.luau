@@ -47,7 +47,7 @@ return function(parent)
 			clickToSelect = scope:Value(nil),
 			showSelection = scope:Value(nil),
 
-			selectedInstance = scope:Value(game.ReplicatedStorage.ModuleScript),
+			selectedInstance = scope:Value(),
 		},
 
 		logging = {
@@ -70,46 +70,98 @@ return function(parent)
 
 			actions = scope:Value({
 				{
-					path = { "Example", "Currency" },
-					name = "Set Currency",
-					description = "Set the Currency of a player.",
+					path = { "Example", "A" },
+					name = "Command 1",
+					description = "",
 
 					uuid = "",
 					context = "Server",
 
-					arguments = {
-						{
-							type = "Number",
-							name = "Currency",
-							default = 10000
-						},
-						{
-							type = "Number",
-							name = "Multiplier",
-							default = 2
-						}
-					}
+					arguments = { }
+				},
+				{
+					path = { "Example", "A" },
+					name = "Command 2",
+					description = "",
+
+					uuid = "",
+					context = "Server",
+
+					arguments = { }
+				},
+				{
+					path = { "Example", "A" },
+					name = "Command 3",
+					description = "",
+
+					uuid = "",
+					context = "Server",
+
+					arguments = { }
+				},
+
+				{
+					path = { "Example", "B" },
+					name = "Command 1",
+					description = "",
+
+					uuid = "",
+					context = "Server",
+
+					arguments = { }
+				},
+				{
+					path = { "Example", "B" },
+					name = "Command 2",
+					description = "",
+
+					uuid = "",
+					context = "Server",
+
+					arguments = { }
+				},
+				{
+					path = { "Example", "B" },
+					name = "Command 3",
+					description = "",
+
+					uuid = "",
+					context = "Server",
+
+					arguments = { }
+				},
+				
+				{
+					path = { "Example" },
+					name = "Command 1",
+					description = "",
+
+					uuid = "",
+					context = "Server",
+
+					arguments = { }
 				},
 				{
 					path = { "Example" },
-					name = "Explode All Players",
-					description = "Set the Currency of a player.",
+					name = "Command 2",
+					description = "",
 
 					uuid = "",
-					context = "Client",
+					context = "Server",
 
 					arguments = { }
-				}
-			})
-		},
+				},
+				{
+					path = { "Example" },
+					name = "Command 3",
+					description = "",
 
-		sandbox = {
-			runtime = scope:Value("Roblox"),
-			availableRuntimes = scope:Value({
-				"Roblox",
-				"Luau",
-				"Swift",
-			}),
+					uuid = "",
+					context = "Server",
+
+					arguments = { }
+				},
+			})
 		},
 
 		liveEvents = {

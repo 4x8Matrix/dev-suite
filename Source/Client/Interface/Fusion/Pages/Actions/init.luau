@@ -20,7 +20,7 @@ local Actions = {}
 Actions.DisplayName = `Actions`
 Actions.DisplayOrder = 8
 Actions.DisplayIcon = Theme.ActionsIcon
-Actions.Enabled = false
+Actions.Enabled = true
 
 function Actions.Render(scope: Scope, props: Props)
 	local focusedAction = scope:Value(nil)

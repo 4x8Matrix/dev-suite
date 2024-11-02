@@ -20,7 +20,8 @@ function ActionList.RenderAction(
 	values: {
 		selectedAction: FusionTypes.Value<Action>,
 		closedFolders: FusionTypes.Value<{ string }>
-	}
+	},
+	children: { Instance }
 )
 	local frame
 	local isReadyForEvent
@@ -29,6 +30,7 @@ function ActionList.RenderAction(
 		Size = UDim2.new(1, 0, 0, 20),
 		AutomaticSize = Enum.AutomaticSize.X,
 		BackgroundTransparency = 0,
+		LayoutOrder = #children,
 		BackgroundColor3 = scope:Computed(function(use)
 			local isNodeActive = use(values.selectedAction) == node
 
@@ -85,7 +87,7 @@ function ActionList.RenderAction(
 		}
 	})
 
-	return { frame }
+	table.insert(children, frame)
 end
 
 function ActionList.RenderFolder(
@@ -95,7 +97,8 @@ function ActionList.RenderFolder(
 	values: {
 		selectedAction: FusionTypes.Value<Action>,
 		closedFolders: FusionTypes.Value<{ string }>
-	}
+	},
+	children: { Instance }
 )
 	local tabButton
 	local frame
@@ -129,6 +132,7 @@ function ActionList.RenderFolder(
 		AutomaticSize = Enum.AutomaticSize.X,
 		BackgroundTransparency = 0,
 		BackgroundColor3 = Theme.BaseTopbarColor3,
+		LayoutOrder = #children,
 
 		[Fusion.Children] = {
 			UIListLayout = scope:New("UIListLayout")({
@@ -178,21 +182,17 @@ function ActionList.RenderFolder(
 		}
 	})
 
-	local objects = { frame }
+	table.insert(children, frame)
 
 	if not Fusion.peek(values.closedFolders)[fullName] then
 		for _, childNode in node.children do
 			if childNode.type == "Folder" then
-				for _, object in ActionList.RenderFolder(scope, childNode, depth + 1, values) do
-					table.insert(objects, object)
-				end
+				ActionList.RenderFolder(scope, childNode, depth + 1, values, children)
 			elseif childNode.type == "Action" then
-				table.insert(objects, ActionList.RenderAction(scope, childNode.action :: any, depth + 1, values))
+				ActionList.RenderAction(scope, childNode.action :: any, depth + 1, values, children)
 			end
 		end
 	end
-
-	return objects
 end
 
 function ActionList.IntoNodesTable(actions: { Action }): ActionNode
@@ -285,17 +285,17 @@ function ActionList.Render(
 		}),
 	}
 
+	warn(actionNodes)
+
 	if #actionNodes.children == 0 then
 		return ActionList.RenderEmptyPage(scope)
 	end
 
 	for _, node in actionNodes.children do
 		if node.type == "Folder" then
-			for _, object in ActionList.RenderFolder(scope, node, 0, values) do
-				table.insert(children, object)
-			end
+			ActionList.RenderFolder(scope, node, 0, values, children)
 		elseif node.type == "Action" then
-			table.insert(children, ActionList.RenderAction(scope, node.action, 0, values))
+			ActionList.RenderAction(scope, node.action, 0, values, children)
 		end
 	end
 
