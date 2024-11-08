@@ -51,6 +51,108 @@ local selectedPage = windowScope:Value(nil)
 local selectedInstanceValue = windowScope:Value(nil)
 local actionsList = windowScope:Value({})
 
+local drawcallStats = windowScope:Value({
+	prefix = "",
+	name = "Drawcall",
+	stats = {
+		Scene = {
+			Triangles = "?",
+			Drawcalls = "?",
+		},
+		Shadows = {
+			Triangles = "?",
+			Drawcalls = "?",
+		}
+	},
+	graph = { },
+})
+
+local frameStats = windowScope:Value({
+	prefix = "ms",
+	name = "Frame",
+	stats = {
+		Frame = "?",
+		Heartbeat = "?",
+		Physics = "?",
+
+		["GPU Time"] = "?",
+		["CPU Time"] = "?",
+	},
+	graph = { },
+})
+
+local metadataStats = windowScope:Value({
+	prefix = "",
+	name = "Metadata",
+	stats = {
+		["Rbxl Version"] = "?",
+		["Place Version"] = "?",
+	},
+	graph = { },
+})
+
+local instanceStats = windowScope:Value({
+	prefix = "",
+	name = "Instance",
+	stats = {
+		Count = "?",
+		Collisions = "?",
+		Moving = "?",
+	},
+	graph = { },
+})
+
+local networkStats = windowScope:Value({
+	prefix = "kbps",
+	name = "Network",
+	stats = {
+		Data = {
+			Send = "?",
+			Recv = "?",
+		},
+		Physics = {
+			Send = "?",
+			Recv = "?",
+		},
+	},
+	graph = { },
+})
+
+local memoryStats = windowScope:Value({
+	prefix = "MB",
+	name = "Memory",
+	stats = {
+		Graphics = {
+			Particles = "?",
+			Models = "?",
+			SpatialHash = "?",
+			Terrain = "?",
+			Texture = "?",
+		},
+		Roblox = {
+			Internal = "?",
+			Http = "?",
+			Instances = "?",
+			Signals = "?",
+			LuaHeap = "?",
+			Script = "?",
+		},
+		Physics = {
+			Collisions = "?",
+			Parts = "?",
+		},
+		World = {
+			Sounds = "?",
+			CSG = "?",
+			Navigation = "?",
+			Animation = "?",
+			Gui = "?",
+			Voxels = "?",
+		}
+	},
+	graph = { },
+})
+
 local Interface = {}
 
 Interface.ExecuteActionRequested = Signal.new()
@@ -74,6 +176,10 @@ Interface.BreakpointLogsRequested = Signal.new()
 Interface.SelectedInstanceChanged = Signal.new()
 
 Interface.RepeatRemoteEventCallRequested = Signal.new()
+
+Interface.RefreshStatsRequested = Signal.new()
+Interface.EnableAutoRefreshRequested = Signal.new()
+Interface.DisableAutoRefreshRequested = Signal.new()
 
 --[[
 	This function will create both the Window + Indicator UI.
@@ -125,6 +231,17 @@ function Interface.CreateInterface(self: Interface)
 			actions = actionsList
 		},
 
+		statistics = {
+			selectedCategory = windowScope:Value(nil),
+
+			memoryStats = memoryStats,
+			networkStats = networkStats,
+			instanceStats = instanceStats,
+			metadataStats = metadataStats,
+			drawcallStats = drawcallStats,
+			frameStats = frameStats,
+		},
+
 		liveEvents = {
 			events = eventsArray,
 		},
@@ -158,6 +275,13 @@ function Interface.CreateInterface(self: Interface)
 
 			interceptor = {
 				repeatEvent = self.RepeatRemoteEventCallRequested
+			},
+
+			statistics = {
+				refresh = self.RefreshStatsRequested,
+
+				enableAutoRefresh = self.EnableAutoRefreshRequested,
+				disableAutoRefresh = self.DisableAutoRefreshRequested
 			}
 		}
 	})
@@ -286,6 +410,72 @@ end
 ]]
 function Interface.SetInterceptedRemotes(_: Interface, events: { [any]: any })
 	interceptedRemotesArray:set(events)
+end
+
+--[[
+	Will set the stats for the Memory tab.
+]]
+function Interface.SetMemoryStats(_: Interface, stats: { [any]: any })
+	local newStats = Fusion.peek(memoryStats)
+
+	newStats.stats = stats
+
+	memoryStats:set(newStats)
+end
+
+--[[
+	Will set the stats for the Network section.
+]]
+function Interface.SetNetworkStats(_: Interface, stats: { [any]: any })
+	local newStats = Fusion.peek(networkStats)
+
+	newStats.stats = stats
+
+	networkStats:set(newStats)
+end
+
+--[[
+	Will set the stats for the Instance section.
+]]
+function Interface.SetInstanceStats(_: Interface, stats: { [any]: any })
+	local newStats = Fusion.peek(instanceStats)
+
+	newStats.stats = stats
+
+	instanceStats:set(newStats)
+end
+
+--[[
+	Will set the stats for the Metadata section.
+]]
+function Interface.SetMetadataStats(_: Interface, stats: { [any]: any })
+	local newStats = Fusion.peek(metadataStats)
+
+	newStats.stats = stats
+
+	metadataStats:set(newStats)
+end
+
+--[[
+	Will set the stats for the Drawcall section.
+]]
+function Interface.SetDrawcallStats(_: Interface, stats: { [any]: any })
+	local newStats = Fusion.peek(drawcallStats)
+
+	newStats.stats = stats
+
+	drawcallStats:set(newStats)
+end
+
+--[[
+	Will set the stats for the Frame section.
+]]
+function Interface.SetFrameStats(_: Interface, stats: { [any]: any })
+	local newStats = Fusion.peek(frameStats)
+
+	newStats.stats = stats
+
+	frameStats:set(newStats)
 end
 
 function Interface.OnStart(self: Interface)

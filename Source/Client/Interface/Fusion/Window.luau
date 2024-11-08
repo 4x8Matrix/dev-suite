@@ -16,6 +16,19 @@ local Theme = require(Package.Client.Interface.Theme)
 
 local Fusion = require(Package.Parent.Fusion)
 
+type StatStructure = {
+	prefix: string,
+	name: string,
+	stats: {
+		[string]: {
+			[string]: number
+		} | string,
+	},
+	graph: {
+		[string]: number
+	}
+}
+
 return function(scope: FusionTypes.Scope, props: {
 	screenGui: FusionTypes.Value<ScreenGui>,
 	selectedPage: FusionTypes.Value<FusionTypes.Value<PageTypes.PageElement<FusionTypes.Scope, any>>>,
@@ -23,6 +36,17 @@ return function(scope: FusionTypes.Scope, props: {
 	callbacks: {
 		showWindow: FusionTypes.Value<() -> ()>,
 		hideWindow: FusionTypes.Value<() -> ()>,
+	},
+
+	statistics: {
+		selectedCategory: FusionTypes.Value<string?>,
+
+		memoryStats: FusionTypes.Value<StatStructure>,
+		networkStats: FusionTypes.Value<StatStructure>,
+		instanceStats: FusionTypes.Value<StatStructure>,
+		metadataStats: FusionTypes.Value<StatStructure>,
+		drawcallStats: FusionTypes.Value<StatStructure>,
+		frameStats: FusionTypes.Value<StatStructure>
 	},
 
 	explorer: {
@@ -122,6 +146,13 @@ return function(scope: FusionTypes.Scope, props: {
 			clearLogs: SignalTypes.Signal<()>,
 			breakpointLogs: SignalTypes.Signal<()>
 		},
+
+		statistics: {
+			refresh: SignalTypes.Signal<()>,
+
+			enableAutoRefresh: SignalTypes.Signal<()>,
+			disableAutoRefresh: SignalTypes.Signal<()>
+		},
 	
 		minimiseWindow: SignalTypes.Signal<()>,
 	}
@@ -219,6 +250,7 @@ return function(scope: FusionTypes.Scope, props: {
 								logging = props.logging,
 								liveEvents = props.liveEvents,
 								actions = props.actions,
+								statistics = props.statistics,
 
 								minimiseWindowRequested = function()
 									goalPosition:set(0)

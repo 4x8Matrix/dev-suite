@@ -12,7 +12,10 @@ return function(parent)
 	local selectedPage = scope:Value(nil)
 
 	local showWindowValue = scope:Value(nil)
-	
+
+	-- selene: allow(undefined_variable)
+	local version = string.split(version(), ".")
+
 	local windowObject = Window(scope, {
 		screenGui = screenGui,
 		selectedPage = selectedPage,
@@ -20,6 +23,107 @@ return function(parent)
 		callbacks = {
 			showWindow = showWindowValue,
 			hideWindow = scope:Value(nil),
+		},
+
+		statistics = {
+			selectedCategory = scope:Value(nil),
+
+			memoryStats = scope:Value({
+				prefix = "MB",
+				name = "Memory",
+				stats = {
+					Graphics = {
+						Particles = 100,
+						Models = 100,
+						SpatialHash = 100,
+						Terrain = 100,
+						Texture = 100,
+						-- Character = 100
+					},
+					Roblox = {
+						Internal = 100,
+						Http = 100,
+						Instances = 100,
+						Signals = 100,
+						LuaHeap = 100,
+						Script = 100,
+					},
+					Physics = {
+						Collisions = 100,
+						Parts = 100,
+					},
+					World = {
+						Sounds = 100,
+						CSG = 100,
+						Navigation = 100,
+						Animation = 100,
+						Gui = 100,
+						Voxels = 100,
+					}
+				},
+				graph = { },
+			}),
+			networkStats = scope:Value({
+				prefix = "kbps",
+				name = "Network",
+				stats = {
+					Data = {
+						Send = 100,
+						Recv = 100,
+					},
+					Physics = {
+						Send = 100,
+						Recv = 100,
+					},
+				},
+				graph = { },
+			}),
+			instanceStats = scope:Value({
+				prefix = "",
+				name = "Instance",
+				stats = {
+					Count = 10,
+					Collisions = 100,
+					Movingd = 100,
+				},
+				graph = { },
+			}),
+			metadataStats = scope:Value({
+				prefix = "",
+				name = "Metadata",
+				stats = {
+					["Rbxl Version"] = version[2],
+					["Place Version"] = game.PlaceVersion,
+				},
+				graph = { },
+			}),
+			drawcallStats = scope:Value({
+				prefix = "",
+				name = "Drawcall",
+				stats = {
+					Scene = {
+						Drawcalls = 10,
+						Triangles = 100,
+					},
+					Shadows = {
+						Drawcalls = 10,
+						Triangles = 100,
+					}
+				},
+				graph = { },
+			}),
+			frameStats = scope:Value({
+				prefix = "ms",
+				name = "Frame",
+				stats = {
+					["Frame"] = 100,
+					["Heartbeat"] = 100,
+					["Physics"] = 100,
+					["GPU Time"] = 100,
+					["CPU Time"] = 100,
+				},
+				graph = { },
+			}),
 		},
 
 		explorer = {
@@ -188,6 +292,13 @@ return function(parent)
 
 			interceptor = {
 				repeatEvent = Signal.new()
+			},
+
+			statistics = {
+				refresh = Signal.new(),
+
+				enableAutoRefresh = Signal.new(),
+				disableAutoRefresh = Signal.new(),
 			}
 		}
 	})
