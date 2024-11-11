@@ -1,7 +1,5 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Package = script.Parent.Parent.Parent.Parent.Parent
 
-local Sift = require(ReplicatedStorage.Packages.Sift)
 local FusionTypes = require(Package.Types.Fusion)
 local PageTypes = require(Package.Types.Page)
 local SignalTypes = require(Package.Types.Signal)
@@ -17,6 +15,7 @@ local TextBox = require(Package.Client.Interface.Components.TextBox)
 local UIPadding = require(Package.Client.Interface.Components.UIPadding)
 local UICorner = require(Package.Client.Interface.Components.UICorner)
 
+local Sift = require(Package.Parent.Sift)
 local Fusion = require(Package.Parent.Fusion)
 
 local Logging = {}

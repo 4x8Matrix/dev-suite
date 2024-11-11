@@ -1,7 +1,0 @@
-{
-	"name": "dev-suite",
-	"emitLegacyScripts": false,
-	"tree": {
-		"$path": "Source"
-	}
-}
