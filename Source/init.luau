@@ -8,8 +8,7 @@ local RunService = game:GetService("RunService")
 
 local Package = script
 
-local VM = require(script.Client.Singletons.VM)
-local Sift = require(script.Parent.Sift)
+local Sift = require(Package.Parent.Sift)
 local Runtime = require(Package.Parent.Runtime)
 
 local Client = RunService:IsClient() and require(Package.Client)
