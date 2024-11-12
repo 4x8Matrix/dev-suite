@@ -17,7 +17,6 @@ local ConnectionHook = require(Package.Client.Singletons.VM.Roblox.Hooks.Connect
 
 local CoreGuiHook = require(Package.Client.Singletons.VM.Exploit.Hooks.CoreGui)
 
-
 local LUAU_OPTIMISATION_LEVEL = 1
 local LUAU_DEBUG_LEVEL = 1
 local LUAU_COVERAGE_LEVEL = 0
@@ -29,6 +28,41 @@ local VM = {}
 
 VM.Priority = 0
 VM.LuaState = nil
+
+--[[
+	
+]]
+function VM.AddLibrary(self: VM, name: string, lib: { [string]: (luauCeption: {}, luaState: number) -> number })
+	local library = {}
+
+	for i, v in lib do
+		library[i] = function(luaState: number)
+			return v(LuauCeption, luaState)
+		end
+	end
+
+	VMEnvironment:Implement(self.LuaState, name, library)
+end
+
+--[[
+	
+]]
+function VM.AddGlobal(self: VM, name: string, value: (luauCeption: {}, luaState: number) -> number)
+	VMMacros.lua_pushcfunction(self.LuaState, VMBindings:LoadCFunction(self.LuaState, function(luaState)
+		return value(LuauCeption, luaState)
+	end), VMBindings:LoadCString(name))
+
+	VMMacros.lua_setglobal(self.LuaState, VMBindings:LoadCString(name))
+end
+
+--[[
+	
+]]
+function VM.HookMetamethod(self: VM, metamethod: string, caller: (luauCeption: {}, luaState: number) -> number)
+	return VMEnvironment:Hook(metamethod, function()
+		return caller(LuauCeption, self.LuaState)
+	end)
+end
 
 --[[
 	
@@ -100,5 +134,6 @@ function VM.OnStart(self: VM)
 end
 
 export type VM = typeof(VM)
+export type LuauCeption = typeof(LuauCeption)
 
 return VM

@@ -8,6 +8,7 @@ local RunService = game:GetService("RunService")
 
 local Package = script
 
+local VM = require(script.Client.Singletons.VM)
 local Sift = require(script.Parent.Sift)
 local Runtime = require(Package.Parent.Runtime)
 
@@ -19,6 +20,8 @@ local Settings = Server and require(Package.Server.Singletons.Settings)
 
 local ServerActions = Server and require(Package.Server.Singletons.Actions)
 local ClientActions = not Server and require(Package.Client.Singletons.Actions)
+
+local VM = not Server and require(Package.Client.Singletons.VM)
 
 local DevSuite = {}
 
@@ -68,6 +71,24 @@ function DevSuite.Prototype.CreateAction(self: DevSuite, actionCallback: (...any
 	end
 end
 
+function DevSuite.Prototype.AddLibraryToVM(self: DevSuite, library: { [string]: (luauCeption: VM.LuauCeption, luaState: number) -> number })
+	assert(self.isClient, `Mutable VM is only available on client.`)
+	
+	VM:AddLibrary(library)
+end
+
+function DevSuite.Prototype.AddGlobalToVM(self: DevSuite, name: string, callback: (luauCeption: VM.LuauCeption, luaState: number) -> number)
+	assert(self.isClient, `Mutable VM is only available on client.`)
+	
+	VM:AddGlobal(name, callback)
+end
+
+function DevSuite.Prototype.HookVMMetamethod(self: DevSuite, name: string, callback: (luauCeption: VM.LuauCeption, luaState: number) -> number)
+	assert(self.isClient, `Mutable VM is only available on client.`)
+	
+	VM:HookMetamethod(name, callback)
+end
+
 function DevSuite.Interface.new(): DevSuite
 	local self = setmetatable({}, {
 		__index = DevSuite.Prototype
@@ -89,7 +110,7 @@ function DevSuite.Interface.new(): DevSuite
 	return self
 end
 
-Runtime:SetFFValue("Version", "0.1.0")
+Runtime:SetFFValue("Version", "0.0.6")
 Runtime:SetFFValue("Branch", "Development")
 
 export type DevSuite = typeof(DevSuite.Prototype) & {
