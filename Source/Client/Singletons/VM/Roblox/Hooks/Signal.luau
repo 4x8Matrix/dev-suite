@@ -51,7 +51,21 @@ local function connect(luaState: VMTypes.LuaState, signal: RBXScriptSignal)
 		cFunctions.lua_rawgeti(luaState, VMConstants.LUA_REGISTRYINDEX, functionRef)
 		cFunctions.lua_xmove(luaState, thread, 1)
 
-		VMScheduler:AddThreadToQueue(thread, luaState, ...)
+		VMScheduler:Resume(thread, luaState, ...)
+
+		local status = VMScheduler:Status(thread, luaState)
+
+		while true do
+			task.wait()
+
+			status = VMScheduler:Status(thread, luaState)
+
+			if status == "dead" or status == "error" then
+				break
+			end
+		end
+
+		VMScheduler:Cleanup(luaState, thread)
 	end)
 
 	VMBindings:FromLuau(luaState, connection)

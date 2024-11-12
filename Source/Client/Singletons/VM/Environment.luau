@@ -37,7 +37,14 @@ function Environment.Hook(_: Environment, metamethod: string, caller: (luaState:
 
 	assert(pointer, `failed to hook metamethod '{metamethod}' doesn't exist!`)
 
-	return VMBindings:OverwriteCFunction(pointer, caller)
+	return VMBindings:OverwriteCFunction(pointer, function(...)
+		local _, response = xpcall(caller, function(response)
+			warn(`failed to hook metamethod '{metamethod}' with error: {response}`)
+			print(debug.traceback())
+		end, ...)
+
+		return response
+	end)
 end
 
 --[[

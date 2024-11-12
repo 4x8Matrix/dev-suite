@@ -13,6 +13,10 @@ local VMScheduler = require(Package.Client.Singletons.VM.Scheduler)
 local VMContext = require(Package.Client.Singletons.VM.Context)
 
 local SignalHook = require(Package.Client.Singletons.VM.Roblox.Hooks.Signal)
+local ConnectionHook = require(Package.Client.Singletons.VM.Roblox.Hooks.Connection)
+
+local CoreGuiHook = require(Package.Client.Singletons.VM.Exploit.Hooks.CoreGui)
+
 
 local LUAU_OPTIMISATION_LEVEL = 1
 local LUAU_DEBUG_LEVEL = 1
@@ -64,8 +68,6 @@ function VM.Run(self: VM)
 		while status == "running" do
 			task.wait()
 		end
-
-		print(status)
 	end)
 end
 
@@ -88,6 +90,8 @@ function VM.OnStart(self: VM)
 	-- cFunctions.luaL_sandbox(luaState)
 
 	SignalHook()
+	ConnectionHook()
+	CoreGuiHook()
 
 	VMScheduler:StartScheduler()
 	VMScheduler:SetErrorHandler(function(_, message)

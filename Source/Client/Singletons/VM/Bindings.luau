@@ -14,6 +14,7 @@ local LuauCeption = require(Package.Vendor.LuauCeption)
 local VMMacros = require(Package.Client.Singletons.VM.Macros)
 local VMContext = require(Package.Client.Singletons.VM.Context)
 local VMTypes = require(Package.Client.Singletons.VM.Types)
+local VMConstants = require(Package.Client.Singletons.VM.Constants)
 
 local runtime = LuauCeption.wasm.rt
 local store = runtime.store
@@ -80,7 +81,10 @@ function Bindings.LoadCFunction(self: Bindings, luaState: VMTypes.LuaState, sour
 	local pointer = #LuauCeption.wasm.indirect_function_table.data + 1
 
 	LuauCeption.wasm.indirect_function_table.data[pointer] = function(...)
-		local status, result = pcall(source, ...)
+		local status, result = xpcall(source, function(response)
+			warn(`failed to call C function with error: {response}`)
+			print(debug.traceback())
+		end, ...)
 
 		if not status then
 			self:Error(luaState, self:LoadCString(result))
@@ -108,16 +112,37 @@ end
 --[[
 	Pops an instance, in the Roblox engine onto the top of the Luau VMs stack
 ]]
-function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, instance: any)
+function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, instance: any, persistent: boolean?)
+	persistent = true
+
+	local userdataUuids = VMContext:GetValue("userdata-uuids", {})
+	local userdataRefs = VMContext:GetValue("userdata-refs", {})
+	local userdataTag = persistent and 1 or 2
+	local userdataUuid
+
+	if userdataUuids[instance] and userdataRefs[userdataUuids[instance]] then
+		local ref = userdataRefs[userdataUuids[instance]]
+
+		cFunctions.lua_rawgeti(luaState, VMConstants.LUA_REGISTRYINDEX, ref)
+
+		return
+	end
+
+	userdataUuid = uuidCounter + 1
 	uuidCounter += 1
 
-	VMContext:SetValue(`userdata-{uuidCounter}`, instance)
+	VMMacros.lua_newuserdata(luaState, 32)
 
-	VMMacros.lua_newuserdata(luaState, 16)
+	cFunctions.lua_setuserdatatag(luaState, -1, userdataTag)
+	cFunctions.lua_setuserdatadtor(luaState, userdataTag, self:LoadCFunction(luaState, function()
+		print("remove", instance)
+		-- VMContext:UpdateValue("userdata-uuids", function(obj)
+		-- 	local object = obj or {}
 
-	cFunctions.lua_setuserdatatag(luaState, -1, uuidCounter)
-	cFunctions.lua_setuserdatadtor(luaState, uuidCounter, self:LoadCFunction(luaState, function()
-		VMContext:SetValue(`userdata-{uuidCounter}`, nil)
+		-- 	object[instance] = nil
+
+		-- 	return object
+		-- end)
 	end))
 
 	VMMacros.lua_newtable(luaState)
@@ -179,7 +204,7 @@ function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, insta
 				local index = self:ReadCString(indexPointer)
 		
 				local value = self:ToLuau(luaState, 3)
-		
+
 				instance[index] = value
 		
 				return 0
@@ -333,7 +358,19 @@ function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, insta
 	cFunctions.lua_pushstring(luaState, self:LoadCString(typeof(instance)))
 	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__type"))
 
+	cFunctions.lua_pushnumber(luaState, userdataUuid)
+	cFunctions.lua_setfield(luaState, -2, self:LoadCString("__uuid"))
+
 	cFunctions.lua_setmetatable(luaState, -2)
+	
+	userdataUuids[instance] = userdataUuid
+	
+	if persistent then
+		userdataRefs[userdataUuid] = cFunctions.lua_ref(luaState, -1)
+	end
+
+	VMContext:SetValue("userdata-uuids", userdataUuids)
+	VMContext:SetValue("userdata-refs", userdataRefs)
 end
 
 --[[
@@ -400,9 +437,17 @@ function Bindings.ToLuau<T>(self: Bindings, luaState: VMTypes.LuaState, position
 		or typeName == "Vector3"
 		or typeName == "Vector3int16"
 	then
-		local tag = cFunctions.lua_userdatatag(luaState, position)
+		cFunctions.luaL_getmetafield(luaState, position, self:LoadCString("__uuid"))
 
-		return VMContext:GetValue(`userdata-{tag}`) :: any
+		local uuid = VMMacros.lua_tonumber(luaState, -1)
+
+		for instance, instanceUuid in VMContext:GetValue("userdata-uuids") do
+			if instanceUuid == uuid then
+				return instance
+			end
+		end
+
+		return nil :: any
 	elseif typeName == "userdata" then
 		local userdataName = VMMacros.lua_tostring(luaState, position)
 

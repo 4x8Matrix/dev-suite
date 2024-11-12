@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 
 local Package = script.Parent.Parent.Parent.Parent
 
+local Context = require(script.Parent.Context)
 local LuauCeption = require(Package.Vendor.LuauCeption)
 
 local VMBindings = require(Package.Client.Singletons.VM.Bindings)
@@ -78,12 +79,16 @@ function Scheduler.Resume(self: Scheduler, thread: VMTypes.LuaThread, from: VMTy
 			end
 		end
 
-		local errorMessage =  VMBindings:ReadCString(VMMacros.lua_tostring(thread, -1))
+		local errorMessage0 = VMBindings:ReadCString(VMMacros.lua_tostring(thread, -1))
+		local errorMessage1 = from and VMBindings:ReadCString(VMMacros.lua_tostring(from, -1))
+
+		print(errorMessage0, errorMessage1)
+		print(Context:GetMap())
 
 		if errorHandler then
-			errorHandler(thread, errorMessage)
+			errorHandler(thread, errorMessage0)
 		else
-			error(errorMessage)
+			error(errorMessage0)
 		end
 	end
 
@@ -102,7 +107,6 @@ end
 ]]
 function Scheduler.Cleanup(_: Scheduler, luaState: VMTypes.LuaState, thread: VMTypes.LuaThread)
 	VMContext:UpdateValue(`Scheduler.thread.{thread}`, function(ref)
-		warn(thread, VMContext:GetMap())
 		cFunctions.lua_unref(luaState, ref)
 		cFunctions.lua_resetthread(thread)
 	end)
