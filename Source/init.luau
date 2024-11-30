@@ -100,7 +100,11 @@ function DevSuite.Interface.new(): DevSuite
 	end
 
 	self.isClient = RunService:IsClient()
-	self.context = self.isClient and Client.new() or Server.new()
+	if self.isClient then
+		self.context = Client.new()
+	else
+		self.context = Server.new()
+	end
 
 	if not self.isClient then
 		script:SetAttribute("ServerActive", true)
