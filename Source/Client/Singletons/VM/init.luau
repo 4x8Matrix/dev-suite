@@ -10,7 +10,6 @@ local VMBindings = require(Package.Client.Singletons.VM.Bindings)
 local VMEnvironment = require(Package.Client.Singletons.VM.Environment)
 local VMMacros = require(Package.Client.Singletons.VM.Macros)
 local VMScheduler = require(Package.Client.Singletons.VM.Scheduler)
-local VMContext = require(Package.Client.Singletons.VM.Context)
 
 local SignalHook = require(Package.Client.Singletons.VM.Roblox.Hooks.Signal)
 local ConnectionHook = require(Package.Client.Singletons.VM.Roblox.Hooks.Connection)
@@ -58,9 +57,9 @@ end
 --[[
 	
 ]]
-function VM.HookMetamethod(self: VM, metamethod: string, caller: (luauCeption: {}, luaState: number) -> number)
-	return VMEnvironment:Hook(metamethod, function()
-		return caller(LuauCeption, self.LuaState)
+function VM.HookMetamethod(_: VM, metamethod: string, caller: (luauCeption: {}, luaState: number) -> number)
+	return VMEnvironment:Hook(metamethod, function(luaState)
+		return caller(LuauCeption, luaState)
 	end)
 end
 
@@ -99,9 +98,11 @@ function VM.Run(self: VM)
 
 		local status = VMScheduler:Status(thread, self.LuaState)
 
-		while status == "running" do
+		while status == "running" or status == "suspended" or status == "normal" do
 			task.wait()
 		end
+
+		VMScheduler:Cleanup(self.LuaState, thread)
 	end)
 end
 
@@ -118,6 +119,8 @@ end
 
 function VM.OnStart(self: VM)
 	self.LuaState = cFunctions.luaL_newstate()
+
+	LuauCeption.wasm.rt.allocator.grow(LuauCeption.wasm.memory, 728)
 
 	cFunctions.luaL_openlibs(self.LuaState)
 	VMEnvironment:WriteEnvironment(self.LuaState)

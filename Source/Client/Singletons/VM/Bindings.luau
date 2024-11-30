@@ -81,13 +81,16 @@ function Bindings.LoadCFunction(self: Bindings, luaState: VMTypes.LuaState, sour
 	local pointer = #LuauCeption.wasm.indirect_function_table.data + 1
 
 	LuauCeption.wasm.indirect_function_table.data[pointer] = function(...)
+		local message
 		local status, result = xpcall(source, function(response)
 			warn(`failed to call C function with error: {response}`)
 			print(debug.traceback())
+
+			message = response
 		end, ...)
 
 		if not status then
-			self:Error(luaState, self:LoadCString(result))
+			self:Error(luaState, self:LoadCString(message))
 
 			return 0
 		end
@@ -113,7 +116,7 @@ end
 	Pops an instance, in the Roblox engine onto the top of the Luau VMs stack
 ]]
 function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, instance: any, persistent: boolean?)
-	persistent = true
+	-- persistent = true
 
 	local userdataUuids = VMContext:GetValue("userdata-uuids", {})
 	local userdataRefs = VMContext:GetValue("userdata-refs", {})
@@ -173,14 +176,13 @@ function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, insta
 
 				local method = instance[methodName]
 				local response = table.pack(method(instance, table.unpack(arguments)))
-				local responseCount = table.maxn(response)
-		
-				if responseCount ~= 0 then
-					for index = 1, responseCount do
+
+				if response.n ~= 0 then
+					for index = 1, response.n do
 						self:FromLuau(luaState, response[index])
 					end
 		
-					return responseCount
+					return response.n
 				else
 					return 0
 				end
@@ -193,7 +195,25 @@ function Bindings.LoadInstance(self: Bindings, luaState: VMTypes.LuaState, insta
 		
 				local object = instance[index]
 
-				self:FromLuau(luaState, object)
+				if type(object) == "function" then
+					self:FromLuau(luaState, function()
+						local arguments = {}
+
+						for index = 1, cFunctions.lua_gettop(luaState) do
+							table.insert(arguments, self:ToLuau(luaState, index))
+						end
+
+						local results = table.pack(object(table.unpack(arguments)))
+
+						for index = 1, results.n do
+							self:FromLuau(luaState, results[index])
+						end
+
+						return results.n
+					end)
+				else
+					self:FromLuau(luaState, object)
+				end
 
 				return 1
 			end),
