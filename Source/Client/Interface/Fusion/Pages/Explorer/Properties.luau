@@ -16,13 +16,15 @@ local ClassIndex = require(Package.Parent.ClassIndex)
 local MEMBER_TYPE_ICON_MAP = table.freeze({
 	["Event"] = Theme.EventIcon,
 	["Function"] = Theme.FunctionIcon,
-	["Property"] = Theme.PropertyIcon
+	["Property"] = Theme.PropertyIcon,
+	["Attribute"] = Theme.PropertyIcon
 })
 
 local MEMBER_TYPE_ICON_COLORS = table.freeze({
 	["Event"] = Theme.EventIconColor,
 	["Function"] = Theme.FunctionIconColor,
-	["Property"] = Theme.PropertyIconColor
+	["Property"] = Theme.PropertyIconColor,
+	["Attribute"] = Theme.FunctionIconColor
 })
 
 local MEMBER_TYPE_TEXT_COLORS = table.freeze({
@@ -42,8 +44,8 @@ local hasRenderedEmptyPage = false
 
 local Properties = {}
 
-local function processProperty(scope: FusionTypes.Scope, object: Instance, propertyName: string)
-	local member = object[propertyName]
+local function processData(scope: FusionTypes.Scope, object: Instance, propertyName: string, isAttribute: boolean)
+	local member = isAttribute and object:GetAttribute(propertyName) or object[propertyName]
 	local memberType = typeof(member)
 
 	local textColor3 = MEMBER_TYPE_TEXT_COLORS[memberType] or Theme.BaseLabelColor3
@@ -141,8 +143,8 @@ local function processProperty(scope: FusionTypes.Scope, object: Instance, prope
 	})
 end
 
-local function processMember(scope: FusionTypes.Scope, object: Instance, className: string, memberName: string)
-	local memberType = ClassIndex.GetClassMemberType(className, memberName)
+local function processMember(scope: FusionTypes.Scope, object: Instance, className: string, memberName: string, isAttribute: boolean)
+	local memberType = isAttribute and "Attribute" or ClassIndex.GetClassMemberType(className, memberName)
 
 	local memberIcon = MEMBER_TYPE_ICON_MAP[memberType]
 	local memberIconColor = MEMBER_TYPE_ICON_COLORS[memberType]
@@ -202,7 +204,7 @@ local function processMember(scope: FusionTypes.Scope, object: Instance, classNa
 				}
 			}),
 
-			property = isProperty and processProperty(scope, object, memberName) or nil
+			property = (isProperty or isAttribute) and processData(scope, object, memberName, isAttribute) or nil
 		}
 	})
 end
@@ -218,7 +220,11 @@ local function processClass(scope: FusionTypes.Scope, object: Instance, class: s
 	end)
 
 	for _, member in classMembers do
-		table.insert(members, processMember(scope, object, class, member))
+		table.insert(members, processMember(scope, object, class, member, false))
+	end
+
+	for name in object:GetAttributes() do
+		table.insert(members, processMember(scope, object, class, name, true))
 	end
 
 	return scope:New("Frame")({
