@@ -116,7 +116,6 @@ local function processData(scope: FusionTypes.Scope, object: Instance, propertyN
 			Icon = ImageLabel(scope, {
 				Size = UDim2.new(1, 0, 0, 12),
 				Image = Theme.DropdownArrowIcon,
-				-- ImageColor3 = memberIconColor,
 				LayoutOrder = 2,
 
 				[Fusion.Children] = {

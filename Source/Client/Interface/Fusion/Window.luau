@@ -220,7 +220,8 @@ return function(scope: FusionTypes.Scope, props: {
 						Rotation = 45,
 						Position = UDim2.fromScale(1, 1) + UDim2.fromOffset(0, 5),
 						ScaleType = Enum.ScaleType.Stretch,
-						ImageColor3 = Theme.TopbarLabelColor3,
+						ImageColor3 = Theme.BaseIconColor3,
+						ImageTransparency = 0.5,
 
 						AnchorPoint = Vector2.new(1, 1),
 

@@ -87,7 +87,7 @@ return function(scope: FusionTypes.Scope, props: {
 
 					OpenButton = ImageButton(scope, {
 						Image = Theme.DevSuiteIcon,
-						ImageColor3 = Theme.AccentColor3,
+						ImageColor3 = Theme.BaseIconColor3,
 						ImageTransparency = 0.5,
 		
 						Size = UDim2.fromScale(0.75, 0.75),
