@@ -4,6 +4,8 @@ Dev Suite is a collection of tools and resources that enables developers to pent
 
 Dev Suite is yet to be feature complete - but you're still able to use this tool in your projects by installing it via wally.
 
+![image](https://github.com/user-attachments/assets/4cb42ea4-da13-4d66-b9e2-1b76055d37f8)
+
 ### Motivation
 I've always found that exploiters generally have the advantage over developers when it comes to testing, they have a client that they can use to execute *any* code in the Roblox environment..
 
