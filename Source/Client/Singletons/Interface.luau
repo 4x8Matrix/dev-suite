@@ -50,6 +50,7 @@ local selectedPage = windowScope:Value(nil)
 
 local selectedInstanceValue = windowScope:Value(nil)
 local actionsList = windowScope:Value({})
+local customPagesList = windowScope:Value({})
 
 local drawcallStats = windowScope:Value({
 	prefix = "",
@@ -188,6 +189,8 @@ function Interface.CreateInterface(self: Interface)
 	windowObject = Window(windowScope, {
 		selectedPage = selectedPage,
 		size = windowScope:Value(Vector2.new(584, 312)),
+
+		customPages = customPagesList,
 
 		logging = {
 			logs = logsArray,
@@ -473,6 +476,22 @@ function Interface.SetFrameStats(_: Interface, stats: { [any]: any })
 	newStats.stats = stats
 
 	frameStats:set(newStats)
+end
+
+--[[
+	Will add a page to the custom pages state
+]]
+function Interface.AddCustomPage(_: Interface, pageName: string, pageIcon: string, renderCallback: () -> (), cleanupCallback: () -> ())
+	local currentPageList = Fusion.peek(customPagesList)
+
+	table.insert(currentPageList, {
+		name = pageName,
+		icon = pageIcon,
+		renderCallback = renderCallback,
+		cleanupCallback = cleanupCallback,
+	})
+
+	customPagesList:set(currentPageList)
 end
 
 function Interface.OnStart(self: Interface)

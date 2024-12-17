@@ -35,7 +35,7 @@ return function(scope: FusionTypes.Scope, props: {
 					
 					use(props.selectedPage)
 		
-					return `● Status: <i>{frame.Properties.DisplayName or `No Page Selected`}</i>` 
+					return `● Status: <i>{frame and frame.Properties.DisplayName or `No Page Selected`}</i>` 
 				end),
 
 				FontFace = Theme.TopbarLabelFont,

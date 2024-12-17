@@ -45,9 +45,15 @@ return function(scope: FusionTypes.Scope, props: {
 
 				lastScope = contentScope
 
-				lastRender = frame and frame.Render(contentScope, props) or nil
+				if frame.CustomPage then
+					table.insert(lastScope, frame.CleanupCallback)
+
+					return frame.RenderCallback(contentScope, props)
+				else
+					lastRender = frame and frame.Render(contentScope, props) or nil
 				
-				return lastRender
+					return lastRender
+				end
 			end),
 		}
 	})

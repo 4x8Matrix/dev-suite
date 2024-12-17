@@ -33,6 +33,15 @@ type StatStructure = {
 return function(scope: FusionTypes.Scope, props: {
 	selectedPage: FusionTypes.Value<FusionTypes.Value<PageTypes.PageElement<FusionTypes.Scope, any>>>,
 	size: FusionTypes.Value<Vector2>,
+
+	customPages: FusionTypes.Value<{
+		{
+			name: string,
+			icon: string?,
+			renderCallback: () -> () -> (),
+			cleanupCallback: () -> ()
+		}
+	}>,
 	
 	callbacks: {
 		showWindow: FusionTypes.Value<() -> ()>,
@@ -275,6 +284,7 @@ return function(scope: FusionTypes.Scope, props: {
 						[Fusion.Children] = {
 							SidebarPanel = SidebarPanel(scope, {
 								selectedPage = props.selectedPage,
+								customPages = props.customPages,
 							}),
 							ContentPanel = ContentPanel(scope, {
 								selectedPage = props.selectedPage,

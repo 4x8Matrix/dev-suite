@@ -21,6 +21,28 @@ return function(parent)
 		selectedPage = selectedPage,
 
 		size = scope:Value(Vector2.new(584, 312)),
+		customPages = scope:Value({
+			{
+				name = "example 1",
+				icon = "rbxassetid://10251677039",
+				renderCallback = function()
+					print("render page 1")
+				end,
+				cleanupCallback = function()
+					print("unrender page 1")
+				end
+			},
+			{
+				name = "example 2",
+				icon = "rbxassetid://10251677039",
+				renderCallback = function()
+					
+				end,
+				cleanupCallback = function()
+					
+				end
+			}
+		}),
 
 		callbacks = {
 			showWindow = showWindowValue,
