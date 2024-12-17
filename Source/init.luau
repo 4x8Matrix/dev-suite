@@ -70,10 +70,10 @@ function DevSuite.Prototype.CreateAction(self: DevSuite, actionCallback: (...any
 	end
 end
 
-function DevSuite.Prototype.AddLibraryToVM(self: DevSuite, library: { [string]: (luauCeption: VM.LuauCeption, luaState: number) -> number })
+function DevSuite.Prototype.AddLibraryToVM(self: DevSuite, name: string, library: { [string]: (luauCeption: VM.LuauCeption, luaState: number) -> number })
 	assert(self.isClient, `Mutable VM is only available on client.`)
 	
-	VM:AddLibrary(library)
+	VM:AddLibrary(name, library)
 end
 
 function DevSuite.Prototype.AddGlobalToVM(self: DevSuite, name: string, callback: (luauCeption: VM.LuauCeption, luaState: number) -> number)
