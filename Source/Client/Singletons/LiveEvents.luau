@@ -10,7 +10,7 @@ local Interface = require(Package.Client.Singletons.Interface)
 
 local ClassIndex = require(Package.Parent.ClassIndex)
 
-local MAXIMUM_EVENTS_COUNT = 10000
+local MAXIMUM_EVENTS_COUNT = 100
 
 local instanceIgnoreList = {}
 local propertyIgnoreList = {}
@@ -66,6 +66,10 @@ end
 ]]
 function LiveEvents.OnInstanceChanged(self: LiveEvents, object: Instance, property: string)
 	local propertySecurity = ClassIndex.GetClassMemberSecurity(object.ClassName, property)
+
+	if not ClassIndex.IsKnownClassMember(object.ClassName, property) then
+		return
+	end
 
 	table.insert(liveEventsArray, 1, {
 		instanceName = object.Name,

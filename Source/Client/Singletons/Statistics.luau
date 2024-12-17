@@ -82,12 +82,12 @@ end
 
 function Statistics.UpdateFrameStats(_: Statistics)
 	Interface:SetFrameStats({
-		Frame = Stats.RenderFrameTime,
-		Heartbeat = Stats.HeartbeatTime,
-		Physics = Stats.PhysicsTime,
+		Frame = -1,
+		Heartbeat = math.round(Stats.HeartbeatTime * 100) / 100,
+		Physics = math.round(Stats.PhysicsStepTime * 100) / 100,
 
-		["GPU Time"] = Stats.RenderGPUFrameTime,
-		["CPU Time"] = Stats.RenderCPUFrameTime,
+		["GPU Time"] = math.round(Stats.RenderGPUFrameTime * 100) / 100,
+		["CPU Time"] = math.round(Stats.RenderCPUFrameTime * 100) / 100,
 	})
 end
 
@@ -98,16 +98,16 @@ function Statistics.UpdateDrawcallStats(_: Statistics)
 			Drawcalls = math.round(Stats.SceneDrawcallCount * 100) / 100,
 		},
 		Shadows = {
-			Triangles = math.round(Stats.ShadowTriangleCount * 100) / 100,
-			Drawcalls = math.round(Stats.ShadowDrawCount * 100) / 100,
+			Triangles = math.round(Stats.ShadowsTriangleCount * 100) / 100,
+			Drawcalls = math.round(Stats.ShadowsDrawcallCount * 100) / 100,
 		}
 	})
 end
 
 function Statistics.UpdateStatsBulk(self: Statistics)
-	-- self:UpdateDrawcallStats()
+	self:UpdateDrawcallStats()
 	task.wait()
-	-- self:UpdateFrameStats()
+	self:UpdateFrameStats()
 	task.wait()
 	self:UpdateInstanceStats()
 	task.wait()

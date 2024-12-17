@@ -13,7 +13,7 @@ local Interface = require(script.Parent.Interface)
 
 local Network = require(Package.Client.Network)
 
-local MAXIMUM_LOG_COUNT = 10000
+local MAXIMUM_LOG_COUNT = 100
 
 local logObjectsToSendToServer = {}
 

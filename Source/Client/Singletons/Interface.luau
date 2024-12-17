@@ -185,16 +185,14 @@ Interface.DisableAutoRefreshRequested = Signal.new()
 	This function will create both the Window + Indicator UI.
 ]]
 function Interface.CreateInterface(self: Interface)
-	local windowScreenGui = windowScope:Value(nil)
 	windowObject = Window(windowScope, {
-		screenGui = windowScreenGui,
 		selectedPage = selectedPage,
 
 		logging = {
 			logs = logsArray,
 
 			sortOrder = windowScope:Value("Time"),
-			context = windowScope:Value("Server")
+			context = windowScope:Value("Client")
 		},
 
 		explorer = {
@@ -322,8 +320,6 @@ function Interface.CreateInterface(self: Interface)
 
 		self.SelectedInstanceChanged:Fire(value)
 	end)
-
-	windowScreenGui:set(windowObject)
 
 	windowObject.Parent = Players.LocalPlayer.PlayerGui
 	windowObject.Name = `[DEBUG-TOOL]`

@@ -4,7 +4,7 @@ registry = "test"
 
 [[package]]
 name = "4x8matrix/class-index"
-version = "2.0.1"
+version = "3.0.0"
 dependencies = []
 
 [[package]]
@@ -14,8 +14,8 @@ dependencies = [["Signal", "sleitnick/signal@1.5.0"]]
 
 [[package]]
 name = "4x8matrix/dev-suite"
-version = "0.0.6"
-dependencies = [["ClassIndex", "4x8matrix/class-index@2.0.1"], ["Console", "4x8matrix/console@2.1.2"], ["Fusion", "elttob/fusion@0.3.0"], ["Highlighter", "boatbomber/highlighter@0.8.3"], ["Runtime", "4x8matrix/runtime@1.0.0"], ["Sift", "csqrl/sift@0.0.9"], ["Signal", "sleitnick/signal@2.0.1"]]
+version = "0.0.7"
+dependencies = [["ClassIndex", "4x8matrix/class-index@3.0.0"], ["Console", "4x8matrix/console@2.1.2"], ["Fusion", "elttob/fusion@0.3.0"], ["Highlighter", "boatbomber/highlighter@0.8.3"], ["Runtime", "4x8matrix/runtime@1.0.0"], ["Sift", "csqrl/sift@0.0.9"], ["Signal", "sleitnick/signal@2.0.1"]]
 
 [[package]]
 name = "4x8matrix/runtime"

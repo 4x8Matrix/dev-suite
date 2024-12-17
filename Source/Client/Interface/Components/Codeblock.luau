@@ -61,13 +61,9 @@ local function createScrollingFrame(scope: FusionTypes.Scope, props: {
 		lineCount = lineCount
 	})
 
-	props.textBox:set(textBox)
+	local removeHighlighting
 
-	task.defer(function()
-		Highlighter.highlight({
-			textObject = textBox
-		})
-	end)
+	props.textBox:set(textBox)
 
 	return scope:New("ScrollingFrame")({
 		Size = UDim2.fromScale(1, 1),
@@ -105,10 +101,25 @@ local function createScrollingFrame(scope: FusionTypes.Scope, props: {
 						TextScaled = false,
 						Text = scope:Computed(function(use)
 							local lineCountText = ""
-							
 							use(lineCount)
+							local count = Fusion.peek(lineCount)
 
-							for index = 1, Fusion.peek(lineCount) do
+							if count > 1000 and removeHighlighting then
+								removeHighlighting()
+								removeHighlighting = nil
+							else
+								if count < 1000 then
+									if not removeHighlighting then
+										task.defer(function()
+											removeHighlighting = Highlighter.highlight({
+												textObject = textBox
+											})
+										end)
+									end
+								end
+							end
+
+							for index = 1, count do
 								lineCountText ..= `{index}\n`
 							end
 

@@ -99,3 +99,10 @@ event ExecuteServerActionRequested = {
 		arguments: EncodedActionArgument[]
 	}
 }
+
+event ExecuteServerScriptRequested = {
+	from: Client,
+	type: Reliable,
+	call: ManyAsync,
+    data: string
+}

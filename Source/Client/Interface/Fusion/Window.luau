@@ -30,7 +30,6 @@ type StatStructure = {
 }
 
 return function(scope: FusionTypes.Scope, props: {
-	screenGui: FusionTypes.Value<ScreenGui>,
 	selectedPage: FusionTypes.Value<FusionTypes.Value<PageTypes.PageElement<FusionTypes.Scope, any>>>,
 	
 	callbacks: {
@@ -222,10 +221,6 @@ return function(scope: FusionTypes.Scope, props: {
 
 							return 1 - value
 						end)
-					}),
-
-					UIDrag = UIDrag(scope, {
-						bounds = props.screenGui,
 					}),
 
 					UIPadding = UIPadding(scope, {
