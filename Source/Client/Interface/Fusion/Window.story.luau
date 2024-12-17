@@ -20,6 +20,8 @@ return function(parent)
 		screenGui = screenGui,
 		selectedPage = selectedPage,
 
+		size = scope:Value(Vector2.new(584, 312)),
+
 		callbacks = {
 			showWindow = showWindowValue,
 			hideWindow = scope:Value(nil),

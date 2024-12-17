@@ -187,6 +187,7 @@ Interface.DisableAutoRefreshRequested = Signal.new()
 function Interface.CreateInterface(self: Interface)
 	windowObject = Window(windowScope, {
 		selectedPage = selectedPage,
+		size = windowScope:Value(Vector2.new(584, 312)),
 
 		logging = {
 			logs = logsArray,

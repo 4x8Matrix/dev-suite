@@ -8,6 +8,7 @@ local UICorner = require(Package.Client.Interface.Components.UICorner)
 local UIStroke = require(Package.Client.Interface.Components.UIStroke)
 local UIDrag = require(Package.Client.Interface.Components.UIDrag)
 local UIPadding = require(Package.Client.Interface.Components.UIPadding)
+local ImageLabel = require(Package.Client.Interface.Components.ImageLabel)
 
 local SidebarPanel = require(Package.Client.Interface.Fusion.SidebarPanel)
 local ContentPanel = require(Package.Client.Interface.Fusion.ContentPanel)
@@ -31,6 +32,7 @@ type StatStructure = {
 
 return function(scope: FusionTypes.Scope, props: {
 	selectedPage: FusionTypes.Value<FusionTypes.Value<PageTypes.PageElement<FusionTypes.Scope, any>>>,
+	size: FusionTypes.Value<Vector2>,
 	
 	callbacks: {
 		showWindow: FusionTypes.Value<() -> ()>,
@@ -158,6 +160,9 @@ return function(scope: FusionTypes.Scope, props: {
 }): ScreenGui
 	local goalPosition: FusionTypes.Value<number> = scope:Value(0)
 	local tween: FusionTypes.Tween<number> = scope:Tween(goalPosition, TweenInfo.new(0.15, Enum.EasingStyle.Quad))
+	
+	local dragStartPosition
+	local dragStartSize
 
 	props.callbacks.hideWindow:set(function()
 		goalPosition:set(0)
@@ -188,9 +193,10 @@ return function(scope: FusionTypes.Scope, props: {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 
 				Size = scope:Computed(function(use)
+					local targetSize = use(props.size)
 					local value = use(tween)
 
-					return UDim2.fromOffset(484, 212):Lerp(UDim2.fromOffset(584, 312), value)
+					return UDim2.fromOffset(targetSize.X / 2, targetSize.Y / 2):Lerp(UDim2.fromOffset(targetSize.X, targetSize.Y), value)
 				end),
 
 				Position = UDim2.fromScale(0.5, 0.5),
@@ -198,6 +204,39 @@ return function(scope: FusionTypes.Scope, props: {
 				BackgroundColor3 = Theme.BaseBackgroundColor3,
 
 				[Fusion.Children] = {
+					UIDrag = UIDrag(scope),
+					UIResize = ImageLabel(scope, {
+						Size = UDim2.fromOffset(10, 15),
+						Image = Theme.PlayIcon,
+						Rotation = 45,
+						Position = UDim2.fromScale(1, 1) + UDim2.fromOffset(0, 5),
+						ScaleType = Enum.ScaleType.Stretch,
+						ImageColor3 = Theme.TopbarLabelColor3,
+
+						AnchorPoint = Vector2.new(1, 1),
+
+						[Fusion.Children] = {
+							Drag = scope:New("UIDragDetector")({
+								DragStyle = Enum.UIDragDetectorDragStyle.Scriptable,
+
+								[Fusion.OnEvent("DragContinue")] = function(position)
+									local alpha = position - dragStartPosition
+									local newSize = dragStartSize + alpha
+
+									props.size:set(Vector2.new(
+										math.min(math.max(newSize.X, 445), 760),
+										math.min(math.max(newSize.Y, 237), 405)
+									))
+								end,
+
+								[Fusion.OnEvent("DragStart")] = function(position)
+									dragStartPosition = position
+									dragStartSize = Fusion.peek(props.size)
+								end
+							})
+						}
+					}),
+
 					UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({
 						AspectRatio = 1.872
 					}),
