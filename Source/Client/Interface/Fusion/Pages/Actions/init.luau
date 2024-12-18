@@ -16,7 +16,7 @@ local Fusion = require(Package.Parent.Fusion)
 local Actions = {}
 
 Actions.DisplayName = `Actions`
-Actions.DisplayOrder = 8
+Actions.DisplayOrder = 5
 Actions.DisplayIcon = Theme.ActionsIcon
 Actions.Enabled = true
 
@@ -122,7 +122,7 @@ type Props = {
 
 	signals: {
 		actions: {
-			executeAction: SignalTypes.Signal<string>
+			executeAction: SignalTypes.Signal<string, { any }>
 		},
 	}
 }

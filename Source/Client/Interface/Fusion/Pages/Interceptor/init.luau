@@ -14,7 +14,7 @@ local Fusion = require(Package.Parent.Fusion)
 local Interceptor = {}
 
 Interceptor.DisplayName = `Interceptor`
-Interceptor.DisplayOrder = 6
+Interceptor.DisplayOrder = 8
 Interceptor.DisplayIcon = Theme.InterceptorIcon
 Interceptor.Enabled = true
 

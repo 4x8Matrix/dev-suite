@@ -20,7 +20,7 @@ local Fusion = require(Package.Parent.Fusion)
 local Explorer = {}
 
 Explorer.DisplayName = `Explorer`
-Explorer.DisplayOrder = 4
+Explorer.DisplayOrder = 6
 Explorer.DisplayIcon = Theme.ExplorerIcon
 Explorer.Enabled = true
 

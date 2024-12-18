@@ -27,6 +27,9 @@ local ICONS = table.freeze({
 	StatisticsIcon = `http://www.roblox.com/asset/?id=105773589734060`,
 	PerformanceIcon = `http://www.roblox.com/asset/?id=126479063941214`,
 	ActionsIcon = `http://www.roblox.com/asset/?id=139017748369084`,
+	AdminIcon = `http://www.roblox.com/asset/?id=94994868951756`,
+	DebuggerIcon = `http://www.roblox.com/asset/?id=93413399230396`,
+	ScriptHubIcon = `http://www.roblox.com/asset/?id=89767042572716`,
 
 	TabIcon = `http://www.roblox.com/asset/?id=135396811830334`,
 	QuestionIcon = `http://www.roblox.com/asset/?id=82261841272265`,
@@ -332,4 +335,4 @@ local function GetCurrentTheme()
 	return STANDARD_COLORS
 end
 
-return Sift.Dictionary.merge(ICONS, FONTS, Sift.Dictionary.merge(STANDARD_COLORS, GetCurrentTheme()))
+return Sift.Dictionary.merge(ICONS, FONTS, Sift.Dictionary.merge(STANDARD_COLORS, GetCurrentTheme())) :: typeof(ICONS) & typeof(FONTS) & typeof(STANDARD_COLORS)
