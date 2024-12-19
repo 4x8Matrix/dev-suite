@@ -19,8 +19,117 @@ return function(parent)
 	local windowObject = Window(scope, {
 		screenGui = screenGui,
 		selectedPage = selectedPage,
-
 		size = scope:Value(Vector2.new(584, 312)),
+
+		--[[
+		debugger: {
+			threadList: FusionTypes.Value<{ string }>,
+			threadHistory: FusionTypes.Value<{ [string]: {
+				type: string,
+				message: string
+			} }>,
+			threadStats: FusionTypes.Value<{ [string]: {
+				childThreadCount: number,
+				methodCallCount: number,
+				indexCount: number,
+				instanceRefCount: number
+			} }>,
+
+			vmStats: FusionTypes.Value<{
+				memory: number,
+				threads: number,
+				instances: number
+			}>,
+
+			luauRegistry: FusionTypes.Value<{
+				{
+					type: string,
+					name: string
+				}
+			}>
+		},
+		]]
+
+		debugger = {
+			threadList = scope:Value({ "Thread: 0x0000FXXXX","Thread: 0x0000FXXXX" ,"Thread: 0x0000FXXXX" ,"Thread: 0x0000FXXXX" }),
+			threadHistory = scope:Value({
+				["Thread: 0x0000FXXXX"] = {
+					{
+						type = "Global",
+						message = "Called Global: print(...) -> nil"
+					}
+				}
+			}),
+			threadStats = scope:Value({
+				["Thread: 0x0000FXXXX"] = {
+					childThreadCount = 0,
+					methodCallCount = 0,
+					indexCount = 0,
+					instanceRefCount = 0
+				}
+			}),
+
+			vmStats = scope:Value({
+				memory = 63,
+				threads = 1,
+				instances = 100
+			}),
+			luauRegistry = scope:Value({
+				{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},{
+					type = "Function",
+					name = `{tostring(function() end)}`
+				},
+			})
+		},
+
 		customPages = scope:Value({
 			{
 				name = "example 1",

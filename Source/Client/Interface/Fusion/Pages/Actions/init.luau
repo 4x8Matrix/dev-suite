@@ -16,7 +16,7 @@ local Fusion = require(Package.Parent.Fusion)
 local Actions = {}
 
 Actions.DisplayName = `Actions`
-Actions.DisplayOrder = 5
+Actions.DisplayOrder = 6
 Actions.DisplayIcon = Theme.ActionsIcon
 Actions.Enabled = true
 

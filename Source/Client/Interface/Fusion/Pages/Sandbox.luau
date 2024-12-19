@@ -16,6 +16,10 @@ local UICorner = require(Package.Client.Interface.Components.UICorner)
 
 local Codeblock = require(Package.Client.Interface.Components.Codeblock)
 
+local disassemble = require(Package.Utilities.Luau.disassemble)
+
+local LuauCeption = require(Package.Vendor.LuauCeption)
+
 local Fusion = require(Package.Parent.Fusion)
 
 local Sandbox = {}
@@ -142,6 +146,37 @@ function Sandbox.Render(scope: Scope, props: Props)
 
 					ImageLabel = ImageLabel(scope, {
 						Image = Theme.RestartIcon,
+
+						Size = UDim2.fromScale(0.5, 0.5),
+						Position = UDim2.fromScale(0.5, 0.5),
+
+						AnchorPoint = Vector2.new(0.5, 0.5)
+					})
+				}
+			}),
+
+			disassembleButton = Button(scope, {
+				Size = UDim2.fromScale(0.13, 0.13),
+				Position = UDim2.fromScale(0.085, 0.87),
+				BackgroundTransparency = 0,
+				BackgroundColor3 = Theme.BaseSidebarColor3,
+
+				[Fusion.OnEvent("Activated")] = function()
+					local textBox = Fusion.peek(textBoxValue)
+
+					if textBox then
+						local bytecode = LuauCeption.luau_compile(textBox.Text)
+
+						textBox.Text = disassemble(bytecode)
+					end
+				end,
+
+				[Fusion.Children] = {
+					UICorner = UICorner(scope, {}),
+					UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({}),
+
+					ImageLabel = ImageLabel(scope, {
+						Image = Theme.DisassembleIcon,
 
 						Size = UDim2.fromScale(0.5, 0.5),
 						Position = UDim2.fromScale(0.5, 0.5),

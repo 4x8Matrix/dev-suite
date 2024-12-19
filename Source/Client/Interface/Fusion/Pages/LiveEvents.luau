@@ -44,7 +44,7 @@ function LiveEvents.Render(scope: Scope, props: Props)
 
 			UIPadding = UIPadding(scope, {
 				paddingHeight = UDim.new(0, 10),
-				paddingWidth = UDim.new(0, 20)
+				paddingWidth = UDim.new(0, 10)
 			}),
 
 			ScrollingFrame = scope:New("ScrollingFrame")({
@@ -65,7 +65,7 @@ function LiveEvents.Render(scope: Scope, props: Props)
 		
 					if #events == 0 then
 						table.insert(messageLabels, scope:New("Frame")({
-							Size = UDim2.new(1, 0, 0, 40),
+							Size = UDim2.fromScale(1, 0.2),
 							BackgroundColor3 = Theme.BaseTopbarColor3,
 						
 							[Fusion.Children] = {

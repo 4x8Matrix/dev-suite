@@ -12,7 +12,7 @@ local Embedded = {}
 Embedded.DisplayName = `Script Hub`
 Embedded.DisplayOrder = 4
 Embedded.DisplayIcon = Theme.ScriptHubIcon
-Embedded.Enabled = true
+Embedded.Enabled = false
 
 function Embedded.Render(scope: Scope, _props: Props)
 	return scope:New("Frame")({

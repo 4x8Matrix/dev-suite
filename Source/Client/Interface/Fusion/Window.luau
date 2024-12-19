@@ -42,6 +42,33 @@ return function(scope: FusionTypes.Scope, props: {
 			cleanupCallback: () -> ()
 		}
 	}>,
+
+	debugger: {
+		threadList: FusionTypes.Value<{ string }>,
+		threadHistory: FusionTypes.Value<{ [string]: {
+			type: string,
+			message: string
+		} }>,
+		threadStats: FusionTypes.Value<{ [string]: {
+			childThreadCount: number,
+			methodCallCount: number,
+			indexCount: number,
+			instanceRefCount: number
+		} }>,
+
+		vmStats: FusionTypes.Value<{
+			memory: number,
+			threads: number,
+			instances: number
+		}>,
+
+		luauRegistry: FusionTypes.Value<{
+			{
+				type: string,
+				name: string
+			}
+		}>
+	},
 	
 	callbacks: {
 		showWindow: FusionTypes.Value<() -> ()>,
@@ -296,6 +323,7 @@ return function(scope: FusionTypes.Scope, props: {
 								liveEvents = props.liveEvents,
 								actions = props.actions,
 								statistics = props.statistics,
+								debugger = props.debugger,
 
 								minimiseWindowRequested = function()
 									goalPosition:set(0)

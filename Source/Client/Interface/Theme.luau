@@ -30,10 +30,17 @@ local ICONS = table.freeze({
 	AdminIcon = `http://www.roblox.com/asset/?id=94994868951756`,
 	DebuggerIcon = `http://www.roblox.com/asset/?id=93413399230396`,
 	ScriptHubIcon = `http://www.roblox.com/asset/?id=89767042572716`,
+	DisassembleIcon = `http://www.roblox.com/asset/?id=136802181089848`,
 
 	TabIcon = `http://www.roblox.com/asset/?id=135396811830334`,
 	QuestionIcon = `http://www.roblox.com/asset/?id=82261841272265`,
 	RepeatIcon = `http://www.roblox.com/asset/?id=117634959424560`,
+
+	BranchIcon = `http://www.roblox.com/asset/?id=139710967141754`,
+	StructureIcon = `http://www.roblox.com/asset/?id=105922961617726`,
+	CubeIcon = `http://www.roblox.com/asset/?id=114043907559220`,
+	NodesIcon = `http://www.roblox.com/asset/?id=94840064466808`,
+	GlobeIcon = `http://www.roblox.com/asset/?id=71302787754407`,
 
 	PlayIcon = `http://www.roblox.com/asset/?id=123356194161843`,
 	RestartIcon = `http://www.roblox.com/asset/?id=128203851153594`,
@@ -335,4 +342,6 @@ local function GetCurrentTheme()
 	return STANDARD_COLORS
 end
 
-return Sift.Dictionary.merge(ICONS, FONTS, Sift.Dictionary.merge(STANDARD_COLORS, GetCurrentTheme())) :: typeof(ICONS) & typeof(FONTS) & typeof(STANDARD_COLORS)
+export type Theme = typeof(ICONS) & typeof(FONTS) & typeof(STANDARD_COLORS)
+
+return Sift.Dictionary.merge(ICONS, FONTS, Sift.Dictionary.merge(STANDARD_COLORS, GetCurrentTheme())) :: Theme
