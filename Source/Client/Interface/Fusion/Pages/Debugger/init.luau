@@ -1,7 +1,7 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Package = script.Parent.Parent.Parent.Parent.Parent
 
-local Sift = require(ReplicatedStorage.Packages.Sift)
+local Sift = require(Package.Parent.Sift)
+
 local FusionTypes = require(Package.Types.Fusion)
 local PageTypes = require(Package.Types.Page)
 
@@ -17,7 +17,7 @@ local Embedded = {}
 Embedded.DisplayName = `Debugger`
 Embedded.DisplayOrder = 3
 Embedded.DisplayIcon = Theme.DebuggerIcon
-Embedded.Enabled = false
+Embedded.Enabled = true
 
 function Embedded.Render(scope: Scope, props: Props)
 	local selectedThread = scope:Value()

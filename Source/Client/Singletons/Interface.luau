@@ -52,6 +52,13 @@ local selectedInstanceValue = windowScope:Value(nil)
 local actionsList = windowScope:Value({})
 local customPagesList = windowScope:Value({})
 
+local threadList = windowScope:Value({ })
+local threadHistory = windowScope:Value({})
+local threadStats = windowScope:Value({})
+
+local vmStats = windowScope:Value({})
+local luauRegistry = windowScope:Value({})
+
 local drawcallStats = windowScope:Value({
 	prefix = "",
 	name = "Drawcall",
@@ -191,6 +198,15 @@ function Interface.CreateInterface(self: Interface)
 		size = windowScope:Value(Vector2.new(584, 312)),
 
 		customPages = customPagesList,
+		
+		debugger = {
+			threadList = threadList,
+			threadHistory = threadHistory,
+			threadStats = threadStats,
+
+			vmStats = vmStats,
+			luauRegistry = luauRegistry
+		},
 
 		logging = {
 			logs = logsArray,
@@ -406,6 +422,13 @@ function Interface.SetSelectedPage(_: Interface, pageName: string)
 end
 
 --[[
+
+]]
+function Interface.GetSelectedPage(_: Interface)
+	return Fusion.peek(selectedPage).Properties.DisplayName
+end
+
+--[[
 	Will set the array of intercepted remotes.
 ]]
 function Interface.SetInterceptedRemotes(_: Interface, events: { [any]: any })
@@ -476,6 +499,62 @@ function Interface.SetFrameStats(_: Interface, stats: { [any]: any })
 	newStats.stats = stats
 
 	frameStats:set(newStats)
+end
+
+--[[
+	
+]]
+function Interface.SetThreadList(_: Interface, list: { string })
+	threadList:set(list)
+end
+
+--[[
+	
+]]
+function Interface.SetThreadHistory(_: Interface, history: {
+	[string]: {
+		[string]: {
+			type: string,
+			message: string
+		}
+	}
+})
+	threadHistory:set(history)
+end
+
+--[[
+	
+]]
+function Interface.SetThreadStats(_: Interface, stats: { [string]: {
+	childThreadCount: number,
+	methodCallCount: number,
+	indexCount: number,
+	instanceRefCount: number
+} })
+	threadStats:set(stats)
+end
+
+--[[
+	
+]]
+function Interface.SetVMStats(_: Interface, stats: {
+	memory: number,
+	threads: number,
+	instances: number
+})
+	vmStats:set(stats)
+end
+
+--[[
+	
+]]
+function Interface.SetLuauRegistry(_: Interface, registry: {
+	{
+		type: string,
+		name: string
+	}
+})
+	luauRegistry:set(registry)
 end
 
 --[[

@@ -1,13 +1,13 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Package = script.Parent.Parent.Parent.Parent.Parent.Parent
 
-local ImageButton = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.ImageButton)
-local ImageLabel = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.ImageLabel)
-local TextLabel = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.TextLabel)
-local UICorner = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.UICorner)
-local UIPadding = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.UIPadding)
 local FusionTypes = require(Package.Types.Fusion)
 local PageTypes = require(Package.Types.Page)
+
+local ImageButton = require(Package.Client.Interface.Components.ImageButton)
+local ImageLabel = require(Package.Client.Interface.Components.ImageLabel)
+local TextLabel = require(Package.Client.Interface.Components.TextLabel)
+local UICorner = require(Package.Client.Interface.Components.UICorner)
+local UIPadding = require(Package.Client.Interface.Components.UIPadding)
 
 local Theme = require(Package.Client.Interface.Theme)
 
@@ -15,12 +15,17 @@ local Fusion = require(Package.Parent.Fusion)
 
 local TYPE_ICON_MAP = table.freeze({
 	["Global"] = Theme.GlobeIcon,
-	["Function"] = Theme.FunctionIcon
+	["Function"] = Theme.FunctionIcon,
+	["Index"] = Theme.NodesIcon,
+	["Instance"] = Theme.CubeIcon,
+	["Thread"] = Theme.BranchIcon
 })
 
 local ListFrame = {}
 
 function ListFrame.Render(scope: Scope, props: Props)
+	local disabledFilters = scope:Value({})
+
 	return scope:New("Frame")({
 		Size = UDim2.fromScale(1, 1),
 
@@ -44,83 +49,42 @@ function ListFrame.Render(scope: Scope, props: Props)
 						Size =  UDim2.fromScale(1, 1),
 						BackgroundTransparency = 1,
 
-						[Fusion.Children] = {
-							UIListLayout = scope:New("UIListLayout")({
-								VerticalAlignment = Enum.VerticalAlignment.Center,
-								FillDirection = Enum.FillDirection.Horizontal,
-								Padding = UDim.new(0, 10)
-							}),
+						[Fusion.Children] = scope:Computed(function(use)
+							local disabledFiltersValue = use(disabledFilters)
 
-							UIPadding = UIPadding(scope, {
-								paddingHeight = UDim.new(0, 20),
-								paddingWidth = UDim.new(0, 20)
-							}),
+							local children = {
+								UIListLayout = scope:New("UIListLayout")({
+									VerticalAlignment = Enum.VerticalAlignment.Center,
+									FillDirection = Enum.FillDirection.Horizontal,
+									Padding = UDim.new(0, 10)
+								}),
+	
+								UIPadding = UIPadding(scope, {
+									paddingHeight = UDim.new(0, 20),
+									paddingWidth = UDim.new(0, 20)
+								}),
+							}
 
-							GlobalCalled = ImageButton(scope, {
-								Size = UDim2.fromScale(1, 1),
-								Image = Theme.GlobeIcon,
+							for filterName, icon in TYPE_ICON_MAP do
+								table.insert(children, ImageButton(scope, {
+									Size = UDim2.fromScale(1, 1),
+									Image = icon,
+									ImageTransparency = disabledFiltersValue[filterName] and 0.5 or 0,
+	
+									[Fusion.OnEvent("Activated")] = function()
+										disabledFiltersValue[filterName] = not disabledFiltersValue[filterName]
 
-								[Fusion.OnEvent("Activated")] = function()
-									
-								end,
-
-								[Fusion.Children] = {
-									UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({}),
-								}
-							}),
-
-							ChildThreads = ImageButton(scope, {
-								Size = UDim2.fromScale(1, 1),
-								Image = Theme.BranchIcon,
-
-								[Fusion.OnEvent("Activated")] = function()
-									
-								end,
-
-								[Fusion.Children] = {
-									UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({}),
-								}
-							}),
-
-							ReferencedInstances = ImageButton(scope, {
-								Size = UDim2.fromScale(1, 1),
-								Image = Theme.CubeIcon,
-
-								[Fusion.OnEvent("Activated")] = function()
-									
-								end,
-
-								[Fusion.Children] = {
-									UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({}),
-								}
-							}),
-
-							Indexes = ImageButton(scope, {
-								Size = UDim2.fromScale(1, 1),
-								Image = Theme.NodesIcon,
-
-								[Fusion.OnEvent("Activated")] = function()
-									
-								end,
-
-								[Fusion.Children] = {
-									UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({}),
-								}
-							}),
-
-							Calls = ImageButton(scope, {
-								Size = UDim2.fromScale(1, 1),
-								Image = Theme.FunctionIcon,
-
-								[Fusion.OnEvent("Activated")] = function()
-									
-								end,
-
-								[Fusion.Children] = {
-									UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({}),
-								}
-							}),
-						}
+										disabledFilters:set(disabledFiltersValue)
+									end,
+	
+									[Fusion.Children] = {
+										UIAspectRatioConstraint = scope:New("UIAspectRatioConstraint")({}),
+									}
+								}))
+							end
+							
+							return children 
+						end)
 					})
 				}
 			}),
@@ -184,6 +148,11 @@ function ListFrame.Render(scope: Scope, props: Props)
 								table.insert(children, scope:New("Frame")({
 									Size = UDim2.new(1, 0, 0, 25),
 									BackgroundTransparency = 1,
+									Visible = scope:Computed(function(_use)
+										local disabledFiltersValue = _use(disabledFilters)
+
+										return not disabledFiltersValue[object.type]
+									end),
 
 									[Fusion.Children] = {
 										UIPadding = UIPadding(scope, {

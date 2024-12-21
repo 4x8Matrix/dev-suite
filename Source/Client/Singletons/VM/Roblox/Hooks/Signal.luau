@@ -45,30 +45,23 @@ end
 local function connect(luaState: VMTypes.LuaState, signal: RBXScriptSignal)
 	local functionRef = cFunctions.lua_ref(luaState, 2)
 	local connection = signal:Connect(function(...)
-		local thread = VMScheduler:Create(luaState)
+		local thread = VMScheduler:Spawn(luaState)
 
 		VMMacros.lua_pop(luaState, 1)
 		cFunctions.lua_rawgeti(luaState, VMConstants.LUA_REGISTRYINDEX, functionRef)
 		cFunctions.lua_xmove(luaState, thread, 1)
 
-		VMScheduler:Resume(thread, luaState, ...)
+		VMScheduler:Resume(thread, ...)
 
-		local status = VMScheduler:Status(thread, luaState)
-
-		while true do
+		while VMScheduler:Active(thread) do
 			task.wait()
-
-			status = VMScheduler:Status(thread, luaState)
-
-			if status == "dead" or status == "error" then
-				break
-			end
 		end
 
-		VMScheduler:Cleanup(luaState, thread)
+		VMScheduler:Close(thread)
 	end)
 
 	VMBindings:FromLuau(luaState, connection)
+
 	addFunctionRef(signal, connection, functionRef)
 
 	return 1
@@ -79,7 +72,7 @@ local function once(luaState: VMTypes.LuaState, signal: RBXScriptSignal)
 	local connection
 	
 	connection = signal:Connect(function(...)
-		local thread = VMScheduler:Create(luaState)
+		local thread = VMScheduler:Spawn(luaState)
 
 		VMMacros.lua_pop(luaState, 1)
 		cFunctions.lua_rawgeti(luaState, VMConstants.LUA_REGISTRYINDEX, functionRef)
@@ -87,7 +80,7 @@ local function once(luaState: VMTypes.LuaState, signal: RBXScriptSignal)
 
 		removeFunctionRef(luaState, connection)
 
-		VMScheduler:AddThreadToQueue(thread, luaState, ...)
+		VMScheduler:Resume(luaState, ...)
 	end)
 
 	VMBindings:FromLuau(luaState, connection)
@@ -101,7 +94,7 @@ local function wait(luaState: VMTypes.LuaState, signal: RBXScriptSignal)
 		VMScheduler:Resume(luaState, nil, ...)
 	end)
 
-	return VMScheduler:Yield(luaState, -1)
+	return VMScheduler:Yield(luaState)
 end
 
 return function()

@@ -88,20 +88,27 @@ end
 	
 ]]
 function VM.Run(self: VM)
-	local thread = VMScheduler:Create(self.LuaState)
+	local thread = VMScheduler:Spawn(self.LuaState, true)
 
 	VMMacros.lua_pop(self.LuaState, 1)
 	cFunctions.lua_xmove(self.LuaState, thread, 1)
 
-	VMScheduler:AddFunctionToQueue(function()
-		VMScheduler:Resume(thread, self.LuaState)
+	VMScheduler:Resume(thread)
+	
+	while VMScheduler:Active(thread) do
+		task.wait(0.5)
+	end
 
-		local status = VMScheduler:Status(thread, self.LuaState)
+	local results = cFunctions.lua_gettop(thread)
+	local response = {}
 
-		while status == "running" do
-			task.wait()
-		end
-	end)
+	for i = 1, results do
+		table.insert(response, VMBindings:ToLuau(thread, i))
+	end
+
+	VMScheduler:Close(thread)
+
+	return table.unpack(response)
 end
 
 --[[
@@ -125,11 +132,6 @@ function VM.OnStart(self: VM)
 	SignalHook()
 	ConnectionHook()
 	CoreGuiHook()
-
-	VMScheduler:StartScheduler()
-	VMScheduler:SetErrorHandler(function(_, message)
-		warn(`Thread Error:`, message)
-	end)
 end
 
 export type VM = typeof(VM)

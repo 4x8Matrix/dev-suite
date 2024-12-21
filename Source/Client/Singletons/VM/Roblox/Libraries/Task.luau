@@ -18,12 +18,12 @@ local function spawn(luaState: VMTypes.LuaState)
 		arguments[index] = VMBindings:ToLuau(luaState, index + 1)
 	end
 
-	local thread = VMScheduler:Create(luaState)
+	local thread = VMScheduler:Spawn(luaState)
 
 	cFunctions.lua_pushvalue(luaState, 1)
 	cFunctions.lua_xmove(luaState, thread, 1)
 
-	VMScheduler:Resume(thread, luaState, table.unpack(arguments))
+	VMScheduler:Resume(thread, table.unpack(arguments))
 
 	return 1
 end
@@ -37,12 +37,12 @@ local function defer(luaState: VMTypes.LuaState)
 		arguments[index] = VMBindings:ToLuau(luaState, index + 1)
 	end
 
-	local thread = VMScheduler:Create(luaState)
+	local thread = VMScheduler:Spawn(luaState)
 
 	cFunctions.lua_pushvalue(luaState, 1)
 	cFunctions.lua_xmove(luaState, thread, 1)
 
-	VMScheduler:AddThreadToQueue(thread, luaState, table.unpack(arguments))
+	VMScheduler:Resume(thread, table.unpack(arguments))
 
 	return 1
 end
@@ -57,13 +57,13 @@ local function delay(luaState: VMTypes.LuaState)
 		arguments[index] = VMBindings:ToLuau(luaState, index + 2)
 	end
 
-	local thread = VMScheduler:Create(luaState)
+	local thread = VMScheduler:Spawn(luaState)
 
 	cFunctions.lua_pushvalue(luaState, 2)
 	cFunctions.lua_xmove(luaState, thread, 1)
 
 	task.delay(timeToWait, function()
-		VMScheduler:AddThreadToQueue(thread, luaState, table.unpack(arguments))
+		VMScheduler:Resume(thread, table.unpack(arguments))
 	end)
 
 	return 1
@@ -82,12 +82,10 @@ local function wait(luaState: VMTypes.LuaState)
 	local clockStart = os.clock()
 
 	task.delay(timeToWait, function()
-		VMScheduler:AddFunctionToQueue(function()
-			VMScheduler:Resume(luaState, nil, os.clock() - clockStart)
-		end)
+		VMScheduler:Resume(luaState, os.clock() - clockStart)
 	end)
 
-	return VMScheduler:Yield(luaState, 1)
+	return VMScheduler:Yield(luaState)
 end
 
 local function cancel(luaState: VMTypes.LuaState)

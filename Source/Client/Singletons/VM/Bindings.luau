@@ -390,7 +390,7 @@ function Bindings.ToLuau<T>(self: Bindings, luaState: VMTypes.LuaState, position
 		local string = self:ReadCString(stringPointer)
 
 		return string :: any
-	elseif 
+	elseif
 		typeName == "Instance"
 		or typeName == "RBXScriptSignal"
 		or typeName == "RBXScriptConnection"
@@ -480,7 +480,7 @@ function Bindings.ToLuau<T>(self: Bindings, luaState: VMTypes.LuaState, position
 	elseif typeName == "no value" then
 		return nil :: any
 	else
-		error(`critical: cannot convert {typeName} to value`)
+		error(`critical: cannot convert {typeName} to value ('{typeName}')`)
 	end
 end
 

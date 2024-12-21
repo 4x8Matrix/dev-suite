@@ -5,14 +5,6 @@ return {
 	LUAU_GLOBALSINDEX = -LUAI_MAXCSTACK - 2002,
 	LUA_REGISTRYINDEX = -LUAI_MAXCSTACK - 2000,
 
-	lua_CoStatus = {
-		LUA_CORUN = 0,
-		LUA_COSUS = 1,
-		LUA_CONOR = 2,
-		LUA_COFIN = 3,
-		LUA_COERR = 4
-	},
-
 	lua_Status = {
 		LUA_OK = 0,
 		LUA_YIELD = 1,

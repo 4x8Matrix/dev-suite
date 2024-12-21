@@ -1,26 +1,26 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Package = script.Parent.Parent.Parent.Parent.Parent.Parent
 
-local ImageButton = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.ImageButton)
-local ImageLabel = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.ImageLabel)
-local TextLabel = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.TextLabel)
-local UICorner = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.UICorner)
-local UIPadding = require(ReplicatedStorage.Packages.DevSuite.Client.Interface.Components.UIPadding)
-local Sift = require(ReplicatedStorage.Packages.Sift)
+local Sift = require(Package.Parent.Sift)
+
 local FusionTypes = require(Package.Types.Fusion)
 local PageTypes = require(Package.Types.Page)
+
+local ImageButton = require(Package.Client.Interface.Components.ImageButton)
+local ImageLabel = require(Package.Client.Interface.Components.ImageLabel)
+local TextLabel = require(Package.Client.Interface.Components.TextLabel)
+local UICorner = require(Package.Client.Interface.Components.UICorner)
+local UIPadding = require(Package.Client.Interface.Components.UIPadding)
 
 local Theme = require(Package.Client.Interface.Theme)
 
 local Fusion = require(Package.Parent.Fusion)
 
 local TYPE_ICON_MAP = table.freeze({
-	["Event"] = Theme.EventIcon,
-	["Function"] = Theme.FunctionIcon
+	["Function"] = Theme.FunctionIcon,
+	["Table"] = Theme.FunctionIcon
 })
 
 local TYPE_ICON_COLORS = table.freeze({
-	["Event"] = Theme.EventIconColor,
 	["Function"] = Theme.FunctionIconColor,
 })
 
@@ -285,9 +285,9 @@ function ListFrame.Render(scope: Scope, props: Props)
 							ScrollingFrame = scope:New("ScrollingFrame")({
 								Size = UDim2.fromScale(1, 1),
 								BackgroundTransparency = 1,
-								AutomaticCanvasSize = Enum.AutomaticSize.Y,
-								CanvasSize = UDim2.fromScale(0, 0),
+								AutomaticCanvasSize = Enum.AutomaticSize.XY,
 								ClipsDescendants = true,
+								CanvasSize = UDim2.fromScale(0, 1),
 								MidImage = Theme.MiddleScrollingFrameIcon,
 								TopImage = Theme.TopScrollingFrameIcon,
 								BottomImage = Theme.BottomScrollingFrameIcon,
@@ -304,8 +304,8 @@ function ListFrame.Render(scope: Scope, props: Props)
 									}))
 
 									table.insert(children, TextLabel(scope, {
-										Text = "Luau Registry",
-										Size = UDim2.fromScale(1, 0.1),
+										Text = "VM Registry",
+										Size = UDim2.fromScale(1, 0.09),
 										TextXAlignment = Enum.TextXAlignment.Left,
 									}))
 
@@ -317,7 +317,7 @@ function ListFrame.Render(scope: Scope, props: Props)
 
 											[Fusion.Children] = {
 												Icon = ImageLabel(scope, {
-													Image = TYPE_ICON_MAP[stat.type],
+													Image = TYPE_ICON_MAP[stat.type] or Theme.CubeIcon,
 													ImageColor3 = TYPE_ICON_COLORS[stat.type],
 													Position = UDim2.fromScale(0, 0),
 													AnchorPoint = Vector2.new(0, 0),

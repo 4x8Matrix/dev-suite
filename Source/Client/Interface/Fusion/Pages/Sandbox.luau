@@ -31,6 +31,7 @@ Sandbox.Enabled = true
 
 function Sandbox.Render(scope: Scope, props: Props)
 	local textBoxValue = scope:Value()
+	local scrollingFrameValue = scope:Value()
 	local dropdownOpenValue = scope:Value()
 
 	local ignoreInputOnce = false
@@ -65,7 +66,8 @@ function Sandbox.Render(scope: Scope, props: Props)
 			Codeblock = Codeblock(scope, {
 				Size = UDim2.fromScale(1, 0.85),
 				
-				textBox = textBoxValue
+				textBox = textBoxValue,
+				scrollingFrame = scrollingFrameValue
 			}),
 
 			runOnServerButton = Button(scope, {
@@ -134,9 +136,14 @@ function Sandbox.Render(scope: Scope, props: Props)
 
 				[Fusion.OnEvent("Activated")] = function()
 					local textBox = Fusion.peek(textBoxValue)
+					local scrollingFrame = Fusion.peek(scrollingFrameValue)
 
 					if textBox then
 						textBox.Text = ``
+					end
+
+					if scrollingFrame then
+						scrollingFrame.CanvasPosition = Vector2.new()
 					end
 				end,
 

@@ -48,7 +48,8 @@ local function createTextBox(scope: FusionTypes.Scope, props: {
 end
 
 local function createScrollingFrame(scope: FusionTypes.Scope, props: {
-	textBox: FusionTypes.Value<TextBox>
+	textBox: FusionTypes.Value<TextBox>,
+	scrollingFrame: FusionTypes.Value<ScrollingFrame?>?,
 })
 	local hue, saturation, value = Theme.CodeblockBackgroundColor3:ToHSV()
 
@@ -65,7 +66,7 @@ local function createScrollingFrame(scope: FusionTypes.Scope, props: {
 
 	props.textBox:set(textBox)
 
-	return scope:New("ScrollingFrame")({
+	local scrollingFrame = scope:New("ScrollingFrame")({
 		Size = UDim2.fromScale(1, 1),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		CanvasSize = UDim2.fromScale(0, 0),
@@ -153,15 +154,23 @@ local function createScrollingFrame(scope: FusionTypes.Scope, props: {
 			})
 		}
 	})
+
+	if props.scrollingFrame then
+		props.scrollingFrame:set(scrollingFrame)
+	end
+
+	return scrollingFrame
 end
 
 return function(scope: FusionTypes.Scope, props: {
 	Size: UDim2,
 
-	textBox: FusionTypes.Value<TextBox>
+	textBox: FusionTypes.Value<TextBox>,
+	scrollingFrame: FusionTypes.Value<ScrollingFrame?>?,
 })
 	local scrollingFrame = createScrollingFrame(scope, {
 		textBox = props.textBox,
+		scrollingFrame = props.scrollingFrame,
 	})
 
 	return scope:New("CanvasGroup")({

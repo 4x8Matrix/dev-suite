@@ -7,14 +7,14 @@ local Theme = require(Package.Client.Interface.Theme)
 
 local Fusion = require(Package.Parent.Fusion)
 
-local Embedded = {}
+local ScriptHub = {}
 
-Embedded.DisplayName = `Script Hub`
-Embedded.DisplayOrder = 4
-Embedded.DisplayIcon = Theme.ScriptHubIcon
-Embedded.Enabled = false
+ScriptHub.DisplayName = `Script Hub`
+ScriptHub.DisplayOrder = 4
+ScriptHub.DisplayIcon = Theme.ScriptHubIcon
+ScriptHub.Enabled = true
 
-function Embedded.Render(scope: Scope, _props: Props)
+function ScriptHub.Render(scope: Scope, _props: Props)
 	return scope:New("Frame")({
 		Size = UDim2.fromScale(1, 1),
 
@@ -30,12 +30,12 @@ type Scope = FusionTypes.Scope
 type Props = {}
 
 return {
-	Render = Embedded.Render,
+	Render = ScriptHub.Render,
 	Properties = {
-		DisplayOrder = Embedded.DisplayOrder,
-		DisplayName = Embedded.DisplayName,
-		DisplayIcon = Embedded.DisplayIcon,
+		DisplayOrder = ScriptHub.DisplayOrder,
+		DisplayName = ScriptHub.DisplayName,
+		DisplayIcon = ScriptHub.DisplayIcon,
 
-		Enabled = Embedded.Enabled,
+		Enabled = ScriptHub.Enabled,
 	}
 } :: PageTypes.PageElement<Scope, Props>
