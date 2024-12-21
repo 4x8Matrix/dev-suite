@@ -13,7 +13,7 @@ local Authentication = require(Package.Server.Singletons.Authentication)
 
 local logObjectsToSendToClient = {}
 
-local serverLogs = {}
+local _serverLogs = {}
 local playerLogs = {}
 
 local Logging = {}
@@ -27,7 +27,7 @@ function Logging.OnServerLogReceived(_: Logging, message: string, type: Enum.Mes
 		time = logTime
 	})
 
-	table.insert(serverLogs, {
+	table.insert(_serverLogs, {
 		message = message,
 		type = type,
 		time = logTime
@@ -52,6 +52,8 @@ function Logging.OnStart(self: Logging)
 	end)
 
 	Network.ClientReportingLogs.On(function(player, logs)
+		Authentication:Validate(player)
+
 		for _, log in logs do
 			local messageType = Enum.MessageType
 

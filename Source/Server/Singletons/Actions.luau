@@ -64,10 +64,14 @@ end
 
 function Actions.OnStart(self: Actions)
 	Network.FetchActionsRequested.On(function(player)
+		Authentication:Validate(player)
+
 		Network.ServerReportingActions.Fire(player, serverSideActions)
 	end)
 
 	Network.ExecuteServerActionRequested.On(function(player, object)
+		Authentication:Validate(player)
+
 		local arguments = {}
 
 		for _, argument in object.arguments do

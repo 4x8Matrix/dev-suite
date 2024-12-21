@@ -6,6 +6,8 @@ local Package = script.Parent.Parent.Parent
 
 local Network = require(Package.Server.Network)
 
+local Authentication = require(Package.Server.Singletons.Authentication)
+
 local Console = require(Package.Parent.Console)
 
 local reporter = Console.new(script.Name)
@@ -24,7 +26,9 @@ function Sandbox.Execute(_: Sandbox, source: string)
 end
 
 function Sandbox.OnStart(self: Sandbox)
-	Network.ExecuteServerScriptRequested.On(function(_: Player, source: string)
+	Network.ExecuteServerScriptRequested.On(function(player: Player, source: string)
+		Authentication:Validate(player)
+
 		self:Execute(source)
 	end)
 end

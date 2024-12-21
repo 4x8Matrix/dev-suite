@@ -15,6 +15,7 @@ local SignalHook = require(Package.Client.Singletons.VM.Roblox.Hooks.Signal)
 local ConnectionHook = require(Package.Client.Singletons.VM.Roblox.Hooks.Connection)
 
 local CoreGuiHook = require(Package.Client.Singletons.VM.Exploit.Hooks.CoreGui)
+local HttpGetAsyncHook = require(Package.Client.Singletons.VM.Exploit.Hooks.HttpGetAsync)
 
 local LUAU_OPTIMISATION_LEVEL = 1
 local LUAU_DEBUG_LEVEL = 1
@@ -132,6 +133,7 @@ function VM.OnStart(self: VM)
 	SignalHook()
 	ConnectionHook()
 	CoreGuiHook()
+	HttpGetAsyncHook()
 end
 
 export type VM = typeof(VM)

@@ -106,3 +106,9 @@ event ExecuteServerScriptRequested = {
 	call: ManyAsync,
     data: string
 }
+
+funct HttpGetRequest = {
+    call: Sync,
+    args: string,
+    rets: string
+}
