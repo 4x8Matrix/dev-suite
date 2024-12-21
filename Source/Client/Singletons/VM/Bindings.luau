@@ -568,6 +568,21 @@ function Bindings.Error(_: Bindings, luaState: VMTypes.LuaState, errorPointer: V
 	cFunctions.lua_error(luaState)
 end
 
+--[[
+	Fetches the current thread
+]]
+function Bindings.GetCurrentThread(_: Bindings, luaState: VMTypes.LuaState)
+	local thread
+
+	cFunctions.lua_pushthread(luaState)
+
+	thread = cFunctions.lua_tothread(luaState, -1)
+
+	VMMacros.lua_pop(luaState, 1)
+
+	return thread
+end
+
 export type Bindings = typeof(Bindings)
 
 return Bindings

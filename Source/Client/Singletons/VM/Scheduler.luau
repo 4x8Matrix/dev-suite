@@ -115,7 +115,7 @@ end
 --[[
 	Creates a new thread with an optional parent thread and script thread flag.
 ]]
-function Scheduler.Spawn(self: Scheduler, parentThread: VMTypes.LuaThread, isScriptThread: boolean?)
+function Scheduler.Spawn(self: Scheduler, parentThread: VMTypes.LuaThread, isScriptThread: boolean?, quiet: boolean?)
 	local thread = cFunctions.lua_newthread(parentThread)
 	local ref = cFunctions.lua_ref(thread, 1)
 
@@ -135,14 +135,18 @@ function Scheduler.Spawn(self: Scheduler, parentThread: VMTypes.LuaThread, isScr
 	})
 
 	if isScriptThread then
-		self.ScriptThreadSpawned:Fire(thread)
+		if not quiet then
+			self.ScriptThreadSpawned:Fire(thread)
+		end
 	else
 		local scriptThread = self:GetScriptThread(thread)
 		local stats = VMContext:GetValue(`Scheduler.threads.stats.{scriptThread}`)
 	
 		table.insert(stats.childThreads, thread)
 
-		self.ThreadSpawned:Fire(thread, scriptThread)
+		if not quiet then
+			self.ThreadSpawned:Fire(thread, scriptThread)
+		end
 	end
 
 	return thread

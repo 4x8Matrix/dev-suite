@@ -13,8 +13,15 @@ local Interface = require(Package.Client.Singletons.Interface)
 local VM = require(Package.Client.Singletons.VM)
 
 local VMContext = require(Package.Client.Singletons.VM.Context)
+local VMBindings = require(Package.Client.Singletons.VM.Bindings)
+local VMEnvironment = require(Package.Client.Singletons.VM.Environment)
+local VMTypes = require(Package.Client.Singletons.VM.Types)
+local VMScheduler = require(Package.Client.Singletons.VM.Scheduler)
+local VMMacros = require(Package.Client.Singletons.VM.Macros)
 
 local WASM_PAGE_SIZE = 65536
+
+local cFunctions = LuauCeption.wasm.cfns
 
 local threadList = {}
 local threadHistory = {}
@@ -28,6 +35,97 @@ local vmStats = {
 }
 
 local Debugger = {}
+
+function Debugger.HookNamecall(_: Debugger)
+	local callback
+	
+	callback = VMEnvironment:Hook("__namecall", function(luaState: VMTypes.LuaState)
+		local methodName = VMBindings:ReadCString(cFunctions.lua_namecallatom(luaState, 0))
+		local object = VMBindings:ToLuau(luaState, 1)
+		
+		local thread = VMBindings:GetCurrentThread(luaState)
+
+		local scriptThread = VMScheduler:GetScriptThread(thread)
+		local scriptThreadUuid = `Thread: {scriptThread}`
+
+		local arguments = {}
+		local response = {}
+
+		for i = 2, cFunctions.lua_gettop(luaState) - 1 do
+			table.insert(arguments, VMBindings:ToLuau(luaState, i))
+		end
+
+		local count = callback(luaState)
+		local top = cFunctions.lua_gettop(luaState)
+
+		for i = (top - count) + 1, top do
+			table.insert(response, VMBindings:ReadCString(cFunctions.luaL_tolstring(luaState, i, 0)))
+			VMMacros.lua_pop(luaState, 1)
+		end
+
+		threadStats[scriptThreadUuid].methodCallCount += 1
+		table.insert(threadHistory[scriptThreadUuid], {
+			type = "Function",
+			message = `<b>{object}</b>:<b>{methodName}</b>({table.unpack(arguments)}) -> {table.unpack(response)}`,
+		})
+
+		return count
+	end)
+end
+
+function Debugger.HookIndex(_: Debugger)
+	local callback
+	
+	callback = VMEnvironment:Hook("__index", function(luaState: VMTypes.LuaState)
+		local object = VMBindings:ToLuau(luaState, 1)
+		local index = VMBindings:ToLuau(luaState, 2)
+
+		local thread = VMBindings:GetCurrentThread(luaState)
+
+		local scriptThread = VMScheduler:GetScriptThread(thread)
+		local scriptThreadUuid = `Thread: {scriptThread}`
+
+		local response = {}
+
+		local count = callback(luaState)
+		local top = cFunctions.lua_gettop(luaState)
+
+		for i = (top - count) + 1, top do
+			table.insert(response, VMBindings:ReadCString(cFunctions.luaL_tolstring(luaState, i, 0)))
+			VMMacros.lua_pop(luaState, 1)
+		end
+
+		threadStats[scriptThreadUuid].indexCount += 1
+		table.insert(threadHistory[scriptThreadUuid], {
+			type = "Index",
+			message = `<b>{object}</b>.<b>{index}</b> -> {table.unpack(response)}`,
+		})
+
+		return count
+	end)
+end
+
+function Debugger.HookNewIndex(_: Debugger)
+	local callback
+	
+	callback = VMEnvironment:Hook("__newindex", function(luaState: VMTypes.LuaState)
+		local object = VMBindings:ToLuau(luaState, 1)
+		local index = VMBindings:ToLuau(luaState, 2)
+		local value = VMBindings:ToLuau(luaState, 3)
+
+		local thread = VMBindings:GetCurrentThread(luaState)
+
+		local scriptThread = VMScheduler:GetScriptThread(thread)
+		local scriptThreadUuid = `Thread: {scriptThread}`
+
+		table.insert(threadHistory[scriptThreadUuid], {
+			type = "Index",
+			message = `<b>{object}</b>.<b>{index}</b> = {value}`,
+		})
+
+		return callback(luaState)
+	end)
+end
 
 function Debugger.PollVMStats(_: Debugger)
 	local bufferData = buffer.tostring(LuauCeption.wasm.memory.data)
@@ -61,7 +159,7 @@ function Debugger.PollLuauRegistry(_: Debugger)
 		end
 
 		return registry
-	]])
+	]], true)
 
 	local newRegistry = {}
 
@@ -88,16 +186,32 @@ function Debugger.PollLuauRegistry(_: Debugger)
 end
 
 function Debugger.UpdateInterface(_: Debugger)
-	Interface:SetThreadList(threadList)
 	Interface:SetThreadHistory(threadHistory)
 	Interface:SetThreadStats(threadStats)
+	Interface:SetThreadList(threadList)
 
 	Interface:SetVMStats(vmStats)
 	Interface:SetLuauRegistry(luauRegistry)
 end
 
 function Debugger.OnStart(self: Debugger)
-	-- VMScheduler
+	self:HookNamecall()
+	self:HookIndex()
+	self:HookNewIndex()
+
+	VMScheduler.ScriptThreadSpawned:Connect(function(thread: VMTypes.LuaThread)
+		local threadUuid = `Thread: {thread}`
+
+		table.insert(threadList, threadUuid)
+
+		threadHistory[threadUuid] = {}
+		threadStats[threadUuid] = {
+			childThreadCount = 0,
+			indexCount = 0,
+			methodCallCount = 0,
+			instanceRefCount = 0,
+		}
+	end)
 
 	while true do
 		task.wait(1)

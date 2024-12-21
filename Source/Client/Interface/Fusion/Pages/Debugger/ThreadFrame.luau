@@ -136,6 +136,10 @@ function ListFrame.Render(scope: Scope, props: Props)
 						[Fusion.Children] = scope:Computed(function(use)
 							local threadHistory = use(props.debugger.threadHistory)
 							local selectedThread = Fusion.peek(props.selectedThread)
+
+							if not selectedThread then
+								return { }
+							end
 				
 							local children = {
 								UIListLayout = scope:New("UIListLayout")({
@@ -144,10 +148,31 @@ function ListFrame.Render(scope: Scope, props: Props)
 								}),
 							}
 
-							for _, object in threadHistory[selectedThread] do
+							if #threadHistory[selectedThread] == 0 then
+								table.insert(children, scope:New("Frame")({
+									Size = UDim2.fromScale(1, 0.2),
+									BackgroundColor3 = Theme.BaseTopbarColor3,
+								
+									[Fusion.Children] = {
+										UIPadding = UIPadding(scope, {
+											paddingWidth = UDim.new(0.1, 0),
+											paddingHeight = UDim.new(0.25, 0)
+										}),
+				
+										TextLabel0 = TextLabel(scope, {
+											Size = UDim2.fromScale(1, 0.45),
+											TextTransparency = 0.5,
+											Text = `Nothing has been captured yet..`
+										})
+									}
+								}))
+							end
+
+							for index, object in threadHistory[selectedThread] do
 								table.insert(children, scope:New("Frame")({
 									Size = UDim2.new(1, 0, 0, 25),
 									BackgroundTransparency = 1,
+									LayoutOrder = index,
 									Visible = scope:Computed(function(_use)
 										local disabledFiltersValue = _use(disabledFilters)
 

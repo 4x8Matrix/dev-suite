@@ -25,7 +25,7 @@ local cFunctions = LuauCeption.wasm.cfns
 
 local VM = {}
 
-VM.Priority = 0
+VM.Priority = 1
 VM.LuaState = nil
 
 --[[
@@ -87,8 +87,8 @@ end
 --[[
 	
 ]]
-function VM.Run(self: VM)
-	local thread = VMScheduler:Spawn(self.LuaState, true)
+function VM.Run(self: VM, quiet: boolean?)
+	local thread = VMScheduler:Spawn(self.LuaState, true, quiet)
 
 	VMMacros.lua_pop(self.LuaState, 1)
 	cFunctions.lua_xmove(self.LuaState, thread, 1)
@@ -114,12 +114,12 @@ end
 --[[
 	
 ]]
-function VM.Eval(self: VM, source: string)
+function VM.Eval(self: VM, source: string, quiet: boolean?)
 	self:Load(source)
 
 	VMEnvironment:WriteFunctionEnvironment(self.LuaState)
 
-	return self:Run()
+	return self:Run(quiet)
 end
 
 function VM.OnStart(self: VM)

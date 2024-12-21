@@ -16,8 +16,11 @@ local Theme = require(Package.Client.Interface.Theme)
 local Fusion = require(Package.Parent.Fusion)
 
 local TYPE_ICON_MAP = table.freeze({
+	["Global"] = Theme.GlobeIcon,
 	["Function"] = Theme.FunctionIcon,
-	["Table"] = Theme.FunctionIcon
+	["Index"] = Theme.NodesIcon,
+	["Instance"] = Theme.CubeIcon,
+	["Thread"] = Theme.BranchIcon
 })
 
 local TYPE_ICON_COLORS = table.freeze({
@@ -60,10 +63,38 @@ function ListFrame.Render(scope: Scope, props: Props)
 							local threadStats = use(props.debugger.threadStats)
 							local children = {
 								UIListLayout = scope:New("UIListLayout")({
+									SortOrder = Enum.SortOrder.LayoutOrder,
 									FillDirection = Enum.FillDirection.Vertical,
 									Padding = UDim.new(0, 5),
 								})
 							}
+
+							if #threadList == 0 then
+								table.insert(children, scope:New("Frame")({
+									Size = UDim2.fromScale(1, 0.3),
+									BackgroundColor3 = Theme.BaseTopbarColor3,
+								
+									[Fusion.Children] = {
+										UIPadding = UIPadding(scope, {
+											paddingWidth = UDim.new(0.1, 0),
+											paddingHeight = UDim.new(0.25, 0)
+										}),
+				
+										TextLabel0 = TextLabel(scope, {
+											Size = UDim2.fromScale(1, 0.45),
+											TextTransparency = 0.5,
+											Text = `Please execute something in the <i>Sandbox</i>!`
+										}),
+
+										TextLabel1 = TextLabel(scope, {
+											Size = UDim2.fromScale(1, 0.5),
+											Position = UDim2.fromScale(0, 0.5),
+											TextTransparency = 0.5,
+											Text = `<b>The Debugger will reflect actions taken inside of the Sandbox.</b>`
+										})
+									}
+								}))
+							end
 
 							for index, threadId in threadList do
 								local threadMetadata = threadStats[threadId]
@@ -116,6 +147,7 @@ function ListFrame.Render(scope: Scope, props: Props)
 									Size = UDim2.new(1, 0, 0, 75),
 									Position = UDim2.fromScale(0, ((index - 1) * 0.1)),
 									BackgroundColor3 = Theme.BaseTopbarColor3,
+									LayoutOrder = #threadList - index,
 
 									[Fusion.Children] = {
 										UICorner = UICorner(scope, {
