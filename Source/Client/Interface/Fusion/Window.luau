@@ -43,6 +43,16 @@ return function(scope: FusionTypes.Scope, props: {
 		}
 	}>,
 
+	scriptHub: {
+		scripts: FusionTypes.Value<{
+			{
+				name: string,
+				description: string,
+				source: string,
+			}
+		}>
+	},
+
 	debugger: {
 		threadList: FusionTypes.Value<{ string }>,
 		threadHistory: FusionTypes.Value<{ [string]: {
@@ -167,6 +177,10 @@ return function(scope: FusionTypes.Scope, props: {
 	signals: {
 		actions: {
 			executeAction: SignalTypes.Signal<string>
+		},
+
+		scriptHub: {
+			execute: SignalTypes.Signal<string>,
 		},
 
 		sandbox: {
@@ -324,6 +338,7 @@ return function(scope: FusionTypes.Scope, props: {
 								actions = props.actions,
 								statistics = props.statistics,
 								debugger = props.debugger,
+								scriptHub = props.scriptHub,
 
 								minimiseWindowRequested = function()
 									goalPosition:set(0)

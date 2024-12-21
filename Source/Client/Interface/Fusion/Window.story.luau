@@ -21,34 +21,31 @@ return function(parent)
 		selectedPage = selectedPage,
 		size = scope:Value(Vector2.new(584, 312)),
 
-		--[[
-		debugger: {
-			threadList: FusionTypes.Value<{ string }>,
-			threadHistory: FusionTypes.Value<{ [string]: {
-				type: string,
-				message: string
-			} }>,
-			threadStats: FusionTypes.Value<{ [string]: {
-				childThreadCount: number,
-				methodCallCount: number,
-				indexCount: number,
-				instanceRefCount: number
-			} }>,
-
-			vmStats: FusionTypes.Value<{
-				memory: number,
-				threads: number,
-				instances: number
-			}>,
-
-			luauRegistry: FusionTypes.Value<{
+		scriptHub = {
+			scripts = scope:Value({
 				{
-					type: string,
-					name: string
-				}
-			}>
+					name = "Hello, hoarcekat!",
+					description = "This is a sample script",
+					code = ""
+				},{
+					name = "Hello, hoarcekat!",
+					description = "This is a sample script",
+					code = ""
+				},{
+					name = "Hello, hoarcekat!",
+					description = "This is a sample script",
+					code = ""
+				},{
+					name = "Hello, hoarcekat!",
+					description = "This is a sample script",
+					code = ""
+				},{
+					name = "Hello, hoarcekat!",
+					description = "This is a sample script",
+					code = ""
+				},
+			})
 		},
-		]]
 
 		debugger = {
 			threadList = scope:Value({ "Thread: 0x0000FXXXX","Thread: 0x0000FXXXX" ,"Thread: 0x0000FXXXX" ,"Thread: 0x0000FXXXX" }),
@@ -410,6 +407,10 @@ return function(parent)
 
 			actions = {
 				executeAction = Signal.new()
+			},
+
+			scriptHub = {
+				execute = Signal.new(),
 			},
 
 			logging = {

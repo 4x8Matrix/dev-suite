@@ -20,6 +20,7 @@ local VMScheduler = require(Package.Client.Singletons.VM.Scheduler)
 local VMMacros = require(Package.Client.Singletons.VM.Macros)
 
 local WASM_PAGE_SIZE = 65536
+local MAXIMUM_THREADS_TO_TRACK = 50
 
 local cFunctions = LuauCeption.wasm.cfns
 
@@ -63,11 +64,13 @@ function Debugger.HookNamecall(_: Debugger)
 			VMMacros.lua_pop(luaState, 1)
 		end
 
-		threadStats[scriptThreadUuid].methodCallCount += 1
-		table.insert(threadHistory[scriptThreadUuid], {
-			type = "Function",
-			message = `<b>{object}</b>:<b>{methodName}</b>({table.unpack(arguments)}) -> {table.unpack(response)}`,
-		})
+		if threadStats[scriptThreadUuid] and threadHistory[scriptThreadUuid] then
+			threadStats[scriptThreadUuid].methodCallCount += 1
+			table.insert(threadHistory[scriptThreadUuid], {
+				type = "Function",
+				message = `<b>{object}</b>:<b>{methodName}</b>({table.unpack(arguments)}) -> {table.unpack(response)}`,
+			})
+		end
 
 		return count
 	end)
@@ -95,11 +98,13 @@ function Debugger.HookIndex(_: Debugger)
 			VMMacros.lua_pop(luaState, 1)
 		end
 
-		threadStats[scriptThreadUuid].indexCount += 1
-		table.insert(threadHistory[scriptThreadUuid], {
-			type = "Index",
-			message = `<b>{object}</b>.<b>{index}</b> -> {table.unpack(response)}`,
-		})
+		if threadStats[scriptThreadUuid] and threadHistory[scriptThreadUuid] then
+			threadStats[scriptThreadUuid].indexCount += 1
+			table.insert(threadHistory[scriptThreadUuid], {
+				type = "Index",
+				message = `<b>{object}</b>.<b>{index}</b> -> {table.unpack(response)}`,
+			})
+		end
 
 		return count
 	end)
@@ -118,10 +123,12 @@ function Debugger.HookNewIndex(_: Debugger)
 		local scriptThread = VMScheduler:GetScriptThread(thread)
 		local scriptThreadUuid = `Thread: {scriptThread}`
 
-		table.insert(threadHistory[scriptThreadUuid], {
-			type = "Index",
-			message = `<b>{object}</b>.<b>{index}</b> = {value}`,
-		})
+		if threadHistory[scriptThreadUuid] then
+			table.insert(threadHistory[scriptThreadUuid], {
+				type = "Index",
+				message = `<b>{object}</b>.<b>{index}</b> = {value}`,
+			})
+		end
 
 		return callback(luaState)
 	end)
@@ -211,6 +218,13 @@ function Debugger.OnStart(self: Debugger)
 			methodCallCount = 0,
 			instanceRefCount = 0,
 		}
+
+		local removedThread = table.remove(threadList, MAXIMUM_THREADS_TO_TRACK)
+
+		if removedThread then
+			threadHistory[removedThread] = nil
+			threadStats[removedThread] = nil
+		end
 	end)
 
 	while true do

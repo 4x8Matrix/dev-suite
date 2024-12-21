@@ -59,6 +59,8 @@ local threadStats = windowScope:Value({})
 local vmStats = windowScope:Value({})
 local luauRegistry = windowScope:Value({})
 
+local scripts = windowScope:Value({})
+
 local drawcallStats = windowScope:Value({
 	prefix = "",
 	name = "Drawcall",
@@ -189,6 +191,8 @@ Interface.RefreshStatsRequested = Signal.new()
 Interface.EnableAutoRefreshRequested = Signal.new()
 Interface.DisableAutoRefreshRequested = Signal.new()
 
+Interface.ExecuteScriptRequested = Signal.new()
+
 --[[
 	This function will create both the Window + Indicator UI.
 ]]
@@ -198,6 +202,10 @@ function Interface.CreateInterface(self: Interface)
 		size = windowScope:Value(Vector2.new(584, 312)),
 
 		customPages = customPagesList,
+
+		scriptHub = {
+			scripts = scripts,
+		},
 		
 		debugger = {
 			threadList = threadList,
@@ -275,6 +283,10 @@ function Interface.CreateInterface(self: Interface)
 
 		signals = {
 			minimiseWindow = self.MinimiseWindowRequested,
+
+			scriptHub = {
+				execute = self.ExecuteScriptRequested,
+			},
 
 			actions = {
 				executeAction = self.ExecuteActionRequested,
@@ -555,6 +567,19 @@ function Interface.SetLuauRegistry(_: Interface, registry: {
 	}
 })
 	luauRegistry:set(registry)
+end
+
+--[[
+	
+]]
+function Interface.SetScripts(_: Interface, value: {
+	{
+		name: string,
+		description: string,
+		source: string,
+	}
+})
+	scripts:set(value)
 end
 
 --[[
