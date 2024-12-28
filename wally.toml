@@ -1,6 +1,6 @@
 [package]
 name = "4x8matrix/dev-suite"
-version = "0.0.8"
+version = "0.1.0"
 realm = "shared"
 registry = "https://github.com/UpliftGames/wally-index"
 licence = "MIT"
