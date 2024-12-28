@@ -61,6 +61,8 @@ local luauRegistry = windowScope:Value({})
 
 local scripts = windowScope:Value({})
 
+local adminPlayers = windowScope:Value({})
+
 local drawcallStats = windowScope:Value({
 	prefix = "",
 	name = "Drawcall",
@@ -193,6 +195,12 @@ Interface.DisableAutoRefreshRequested = Signal.new()
 
 Interface.ExecuteScriptRequested = Signal.new()
 
+Interface.KickUserRequested = Signal.new()
+Interface.BanUserRequested = Signal.new()
+Interface.AdminUserRequested = Signal.new()
+Interface.RejoinServerRequested = Signal.new()
+Interface.ShutdownServerRequested = Signal.new()
+
 --[[
 	This function will create both the Window + Indicator UI.
 ]]
@@ -202,6 +210,19 @@ function Interface.CreateInterface(self: Interface)
 		size = windowScope:Value(Vector2.new(584, 312)),
 
 		customPages = customPagesList,
+
+		configuration = {
+			openCloseKey = windowScope:Value(Enum.KeyCode.F10),
+			persistentUI = windowScope:Value(true),
+			maxCachedEntries = windowScope:Value(50),
+			shouldDebugSandbox = windowScope:Value(false),
+			shouldDebugScriptHub = windowScope:Value(false),
+			replaceDevConsole = windowScope:Value(false),
+		},
+
+		admin = {
+			players = adminPlayers,
+		},
 
 		scriptHub = {
 			scripts = scripts,
@@ -283,6 +304,14 @@ function Interface.CreateInterface(self: Interface)
 
 		signals = {
 			minimiseWindow = self.MinimiseWindowRequested,
+
+			admin = {
+				kickUser = self.KickUserRequested,
+				banUser = self.BanUserRequested,
+				adminUser = self.AdminUserRequested,
+				rejoinServer = self.RejoinServerRequested,
+				shutServerDown = self.ShutdownServerRequested
+			},
 
 			scriptHub = {
 				execute = self.ExecuteScriptRequested,
@@ -580,6 +609,19 @@ function Interface.SetScripts(_: Interface, value: {
 	}
 })
 	scripts:set(value)
+end
+
+--[[
+	
+]]
+function Interface.SetAdminPlayers(_: Interface, players: {
+	{
+		name: string,
+		id: string,
+		isAdmin: boolean
+	}
+})
+	adminPlayers:set(players)
 end
 
 --[[

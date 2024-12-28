@@ -32,6 +32,10 @@ local ICONS = table.freeze({
 	ScriptHubIcon = `http://www.roblox.com/asset/?id=89767042572716`,
 	DisassembleIcon = `http://www.roblox.com/asset/?id=136802181089848`,
 
+	RemoveUserIcon = `http://www.roblox.com/asset/?id=132728049029946`,
+	AdminUserIcon = `http://www.roblox.com/asset/?id=93124978545670`,
+	BanUserIcon = `http://www.roblox.com/asset/?id=79001497650092`,
+
 	TabIcon = `http://www.roblox.com/asset/?id=135396811830334`,
 	QuestionIcon = `http://www.roblox.com/asset/?id=82261841272265`,
 	RepeatIcon = `http://www.roblox.com/asset/?id=117634959424560`,

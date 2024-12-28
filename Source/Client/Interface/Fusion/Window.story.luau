@@ -21,6 +21,74 @@ return function(parent)
 		selectedPage = selectedPage,
 		size = scope:Value(Vector2.new(584, 312)),
 
+		configuration = {
+			openCloseKey = scope:Value(Enum.KeyCode.F10),
+			persistentUI = scope:Value(true),
+			maxCachedEntries = scope:Value(50),
+			shouldDebugSandbox = scope:Value(false),
+			shouldDebugScriptHub = scope:Value(false),
+			replaceDevConsole = scope:Value(false),
+		},
+
+		admin = {
+			players = scope:Value({
+				{
+					name = "Roblox",
+					id = 1,
+					isAdmin = true
+				},
+				{
+					name = "User",
+					id = 1,
+					isAdmin = false
+				},{
+					name = "User",
+					id = 1,
+					isAdmin = false
+				},{
+					name = "User",
+					id = 1,
+					isAdmin = false
+				},{
+					name = "User",
+					id = 1,
+					isAdmin = false
+				},{
+					name = "User",
+					id = 1,
+					isAdmin = false
+				},{
+					name = "Roblox",
+					id = 1,
+					isAdmin = true
+				},{
+					name = "User",
+					id = 1,
+					isAdmin = false
+				},{
+					name = "User",
+					id = 1,
+					isAdmin = false
+				},{
+					name = "User",
+					id = 1,
+					isAdmin = false
+				},{
+					name = "User",
+					id = 1,
+					isAdmin = false
+				},{
+					name = "Roblox",
+					id = 1,
+					isAdmin = true
+				},{
+					name = "User",
+					id = 1,
+					isAdmin = false
+				},
+			})
+		},
+
 		scriptHub = {
 			scripts = scope:Value({
 				{
@@ -404,6 +472,14 @@ return function(parent)
 
 		signals = {
 			minimiseWindow = Signal.new(),
+
+			admin = {
+				kickUser = Signal.new(),
+				banUser = Signal.new(),
+				rejoinServer = Signal.new(),
+				shutServerDown = Signal.new(),
+				adminUser = Signal.new(),
+			},
 
 			actions = {
 				executeAction = Signal.new()

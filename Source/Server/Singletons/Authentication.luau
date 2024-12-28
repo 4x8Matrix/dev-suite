@@ -23,6 +23,10 @@ function Authentication.IsAuthenticated(self: Authentication, player: Player): b
 	if self.AuthenticationCallback then
 		evaluationCache[player.UserId] = self.AuthenticationCallback(player)
 
+		if evaluationCache[player.UserId] then
+			player:SetAttribute(`DevSuite_Auth`, true)
+		end
+
 		return evaluationCache[player.UserId]
 	end
 
@@ -32,6 +36,8 @@ function Authentication.IsAuthenticated(self: Authentication, player: Player): b
 		hasWarned = true
 	end
 
+	player:SetAttribute(`DevSuite_Auth`, true)
+
 	return true
 end
 
@@ -39,6 +45,10 @@ function Authentication.Validate(self: Authentication, player: Player, ...): boo
 	assert(self:IsAuthenticated(player), `Player '{player.Name}' is not authenticated.`)
 
 	return ...
+end
+
+function Authentication.SetAuthenticated(_: Authentication, player: Player, authenticated: boolean)
+	evaluationCache[player.UserId] = authenticated
 end
 
 function Authentication.GetListOfAuthenticatedPlayers(self: Authentication): { Player }
