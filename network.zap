@@ -107,6 +107,39 @@ event ExecuteServerScriptRequested = {
     data: string
 }
 
+event KickUserRequested = {
+	from: Client,
+	type: Reliable,
+	call: ManyAsync,
+    data: Instance
+}
+
+event BanUserRequested = {
+	from: Client,
+	type: Reliable,
+	call: ManyAsync,
+    data: Instance
+}
+
+event AdminUserRequested = {
+	from: Client,
+	type: Reliable,
+	call: ManyAsync,
+    data: Instance
+}
+
+event RejoinRequested = {
+	from: Client,
+	type: Reliable,
+	call: ManyAsync,
+}
+
+event ShutdownServerRequested = {
+	from: Client,
+	type: Reliable,
+	call: ManyAsync,
+}
+
 funct HttpGetRequest = {
     call: Sync,
     args: string,

@@ -34,6 +34,23 @@ return function(scope: FusionTypes.Scope, props: {
 	selectedPage: FusionTypes.Value<FusionTypes.Value<PageTypes.PageElement<FusionTypes.Scope, any>>>,
 	size: FusionTypes.Value<Vector2>,
 
+	configuration: {
+		openCloseKey: FusionTypes.Value<Enum.KeyCode>,
+		persistentUI: FusionTypes.Value<boolean>,
+		maxCachedEntries: FusionTypes.Value<number>,
+		shouldDebugSandbox: FusionTypes.Value<boolean>,
+		shouldDebugScriptHub: FusionTypes.Value<boolean>,
+		replaceDevConsole: FusionTypes.Value<boolean>,
+	},
+
+	admin: {
+		players: FusionTypes.Value<{
+			name: string,
+			id: string,
+			isAdmin: boolean
+		}>,
+	},
+
 	customPages: FusionTypes.Value<{
 		{
 			name: string,
@@ -175,6 +192,14 @@ return function(scope: FusionTypes.Scope, props: {
 	},
 
 	signals: {
+		admin: {
+			kickUser: SignalTypes.Signal<string>,
+			banUser: SignalTypes.Signal<string>,
+			adminUser: SignalTypes.Signal<string>,
+			rejoinServer: SignalTypes.Signal<()>,
+			shutServerDown: SignalTypes.Signal<()>,
+		},
+		
 		actions: {
 			executeAction: SignalTypes.Signal<string>
 		},
@@ -339,6 +364,8 @@ return function(scope: FusionTypes.Scope, props: {
 								statistics = props.statistics,
 								debugger = props.debugger,
 								scriptHub = props.scriptHub,
+								admin = props.admin,
+								configuration = props.configuration,
 
 								minimiseWindowRequested = function()
 									goalPosition:set(0)
