@@ -26,9 +26,11 @@ DevSuite:CreateAction(actionCallback: (...any) -> (), actionSettings: {
 	name: string,
 	description: string?,
 	arguments: {
-		type: "Number" | "String" | "Boolean" | "Player",
-		name: string,
-		default: any?
+		{
+			type: "Number" | "String" | "Boolean" | "Player",
+			name: string,
+			default: any?
+		}
 	}?,
 })
 ```

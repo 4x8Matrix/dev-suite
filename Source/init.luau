@@ -43,20 +43,23 @@ function DevSuite.Prototype.SetAuthenticationCallback(self: DevSuite, callback: 
 	Authentication.AuthenticationCallback = callback
 end
 
-function DevSuite.Prototype.CreateAction(self: DevSuite, actionCallback: (...any) -> (), actionSettings: {
+function DevSuite.Prototype.CreateAction(self: DevSuite, actionSettings: {
 	name: string,
+	callback: (...any) -> (),
 	description: string?,
 	arguments: {
-		type: "Number" | "String" | "Boolean" | "Player",
-		name: string,
-		default: any?
+		{
+			type: "Number" | "String" | "Boolean" | "Player",
+			name: string,
+			default: any?
+		}
 	}?,
 })
 	local object = Sift.Dictionary.copyDeep(actionSettings)
 
 	object.description = object.description or ""
 	object.arguments = object.arguments or {}
-	object.callback = actionCallback
+	object.callback = object.callback
 
 	for index, argument in object.arguments do
 		argument.type = argument.type or "String"
