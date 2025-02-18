@@ -45,7 +45,7 @@ local hasRenderedEmptyPage = false
 local Properties = {}
 
 local function processData(scope: FusionTypes.Scope, object: Instance, propertyName: string, isAttribute: boolean)
-	local member = isAttribute and object:GetAttribute(propertyName) or object[propertyName]
+	local member = if isAttribute then object:GetAttribute(propertyName) else object[propertyName]
 	local memberType = typeof(member)
 
 	local textColor3 = MEMBER_TYPE_TEXT_COLORS[memberType] or Theme.BaseLabelColor3
@@ -203,7 +203,7 @@ local function processMember(scope: FusionTypes.Scope, object: Instance, classNa
 				}
 			}),
 
-			property = (isProperty or isAttribute) and processData(scope, object, memberName, isAttribute) or nil
+			property = if isProperty or isAttribute then processData(scope, object, memberName, isAttribute) else nil
 		}
 	})
 end
